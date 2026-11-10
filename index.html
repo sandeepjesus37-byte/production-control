@@ -1,0 +1,856 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Production Control - Demo (sample data)</title>
+<style>
+:root{--page:#f3f5f8;--surface:#fff;--ink:#1c2733;--muted:#667385;--line:#e2e7ee;--accent:#12a58c;--accent-dark:#0c7d6a;--accent-soft:#e5f5f1;--crit:#e05263;--warn:#f0a63a;--blue:#3a7bd5;--violet:#9b59b6;--grid:#eaeff2;
+--open-bg:#fff3d9;--open:#b87400;--over-bg:#fde9e9;--over:#c93636;--prog-bg:#e5eeff;--prog:#2563c9;--ok-bg:#e2f5ea;--ok:#1b8a4e;--shadow:0 1px 2px rgba(20,30,40,.06)}
+@media(prefers-color-scheme:dark){:root:not([data-theme=light]){--page:#10161c;--surface:#18212a;--ink:#eef4f8;--muted:#a9bac6;--line:#2a3745;--accent:#1fc7ab;--accent-dark:#16b39a;--accent-soft:#16332f;--crit:#e8677a;--grid:#253240;--open-bg:#3b2f12;--open:#f0b84a;--over-bg:#3d1e24;--over:#f08a95;--prog-bg:#1c2c4a;--prog:#7fa8f0;--ok-bg:#173626;--ok:#58cf8b;color-scheme:dark}}
+*{box-sizing:border-box}html,body{height:100%}
+body{margin:0;background:var(--page);color:var(--ink);font:14px/1.45 "Inter",system-ui,"Segoe UI",Arial,sans-serif}
+button,select,input,textarea{font:inherit;color:inherit}
+a{color:var(--accent-dark);text-decoration:none;cursor:pointer}a:hover{text-decoration:underline}
+.app{display:grid;grid-template-columns:236px 1fr;min-height:100%}
+.side{background:var(--surface);border-right:1px solid var(--line);padding:14px 10px;position:sticky;top:0;height:100vh;overflow:auto;display:flex;flex-direction:column}
+.brand{display:flex;align-items:center;gap:10px;font-weight:700;padding:2px 6px 8px}
+.logo{width:30px;height:30px;border-radius:8px;background:var(--accent);color:#fff;display:grid;place-items:center;font-size:12px;font-weight:700}
+.env{display:inline-block;margin:0 6px 8px;font-size:10.5px;letter-spacing:.06em;font-weight:700;color:var(--accent-dark);background:var(--accent-soft);border-radius:999px;padding:2px 10px}
+.grp>button.gh{display:flex;align-items:center;justify-content:space-between;width:100%;border:0;background:none;padding:8px 10px;border-radius:8px;cursor:pointer;font-weight:600}
+.grp>button.gh:hover{background:var(--accent-soft)}
+.grp .chev{transition:transform .15s;color:var(--muted)}.grp.open .chev{transform:rotate(90deg)}
+.grp .items{display:none;padding:2px 0 6px 12px}.grp.open .items{display:block}
+.nav{display:flex;align-items:center;justify-content:space-between;width:100%;border:0;background:none;text-align:left;padding:6px 10px;border-radius:8px;cursor:pointer;color:var(--ink);font-size:13.5px}
+.nav:hover{background:var(--accent-soft)}.nav.on{background:var(--accent-soft);color:var(--accent-dark);font-weight:600}
+.pill{background:var(--crit);color:#fff;border-radius:999px;font-size:11px;font-weight:700;padding:0 7px;min-width:20px;text-align:center}
+.side .foot{margin-top:auto;padding:12px 8px 0;color:var(--muted);font-size:12px}
+.main{min-width:0}
+.top{display:flex;align-items:center;gap:12px;padding:10px 22px;background:var(--surface);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:5;flex-wrap:wrap}
+.crumb{color:var(--muted)}.crumb b{color:var(--ink)}.top .sp{flex:1}
+.top label{color:var(--muted);font-size:12.5px;display:flex;gap:6px;align-items:center}
+select,input[type=text],input[type=number],input[type=date],textarea{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:6px 9px;max-width:100%}
+.bell{position:relative;border:1px solid var(--line);background:var(--surface);border-radius:8px;width:34px;height:34px;cursor:pointer}
+.bell i{position:absolute;top:-6px;right:-6px;background:var(--crit);color:#fff;font:700 10px/1 system-ui;border-radius:99px;padding:3px 5px;font-style:normal}
+.who{display:flex;align-items:center;gap:8px;font-weight:600}.av{width:30px;height:30px;border-radius:50%;background:var(--accent);color:#fff;display:grid;place-items:center;font-weight:700}
+.page{padding:20px 22px 70px;max-width:1340px}
+h1{font-size:22px;margin:0 0 4px}h2{font-size:16px;margin:0 0 4px}h3{font-size:14px;margin:0}
+.sub{color:var(--muted);margin:0 0 14px;max-width:90ch}
+.head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;margin-bottom:12px}
+.btn{border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:7px 14px;cursor:pointer;font-weight:600}
+.btn:hover{border-color:var(--accent)}.btn.p{background:var(--accent);border-color:var(--accent);color:#fff}.btn.sm{padding:3px 10px;font-size:12.5px}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-bottom:14px}
+.tile{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px;box-shadow:var(--shadow);display:flex;gap:12px;align-items:center;cursor:pointer;min-width:0}
+.tile:hover{border-color:var(--accent)}
+.ic{width:38px;height:38px;border-radius:10px;display:grid;place-items:center;font-size:17px;flex:none}
+.ic.a{background:var(--open-bg)}.ic.r{background:var(--over-bg)}.ic.b{background:var(--prog-bg)}.ic.g{background:var(--ok-bg)}.ic.t{background:var(--accent-soft)}
+.num{font-size:26px;font-weight:700;line-height:1.1;font-variant-numeric:tabular-nums}.num small{font-size:14px;color:var(--muted);font-weight:500}
+.lab{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}.hint{font-size:12px;color:var(--muted)}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:14px;box-shadow:var(--shadow)}
+.two{display:grid;grid-template-columns:1.5fr 1fr;gap:14px}.two.e{grid-template-columns:1fr 1fr}.two{align-items:start}.two>*{min-width:0}
+@media(max-width:1000px){.two,.two.e{grid-template-columns:1fr}.app{grid-template-columns:1fr}.side{position:static;height:auto}}
+.cells{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px;margin-top:10px}
+.cell{border:1px solid var(--line);border-left:4px solid var(--accent);border-radius:10px;padding:10px 12px;cursor:pointer}
+.cell.red{border-left-color:var(--crit)}.cell:hover{background:var(--accent-soft)}
+.chip{display:inline-block;border-radius:999px;padding:1px 9px;font-size:12px;font-weight:600;margin:2px 4px 2px 0;white-space:nowrap}
+.c-open{background:var(--open-bg);color:var(--open)}.c-over{background:var(--over-bg);color:var(--over)}.c-done,.c-ok{background:var(--ok-bg);color:var(--ok)}.c-prog{background:var(--prog-bg);color:var(--prog)}.c-crit{background:var(--over-bg);color:var(--over)}.c-warn{background:var(--open-bg);color:var(--open)}.c-idle{background:var(--line);color:var(--muted)}
+table{border-collapse:collapse;width:100%;font-size:13px}
+th{text-align:left;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);padding:8px 10px;border-bottom:1px solid var(--line);white-space:nowrap;position:sticky;top:0;background:var(--surface)}
+td{padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:middle}
+tr.click{cursor:pointer}tr.click:hover td{background:var(--accent-soft)}
+.tw{overflow:auto;max-height:440px}.tw.tall{max-height:640px}.nw td{white-space:nowrap}.page{padding-bottom:70px}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;align-items:center}
+.tab{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:4px 14px;cursor:pointer;font-weight:600;font-size:13px}.tab.on{background:var(--accent);border-color:var(--accent);color:#fff}
+.bar{height:8px;background:var(--grid);border-radius:99px;overflow:hidden;min-width:80px}.bar i{display:block;height:100%;border-radius:99px;background:var(--accent)}.bar i.w{background:var(--warn)}.bar i.c{background:var(--crit)}
+.hb{display:grid;grid-template-columns:150px 1fr 130px;gap:10px;align-items:center;margin:7px 0;font-size:13px}.hb .bar{height:12px}
+.legend{display:flex;gap:14px;font-size:12px;color:var(--muted);flex-wrap:wrap;margin-top:6px}.legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px}
+.stat{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin-bottom:14px}.stat>div{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 14px}.stat b{display:block;font-size:20px;margin-top:2px}
+.filters{display:flex;gap:14px;flex-wrap:wrap;align-items:flex-end}.filters label{display:grid;gap:3px;font-size:12px;color:var(--muted);font-weight:600}
+.modal{position:fixed;inset:0;background:rgba(10,16,22,.5);display:grid;place-items:center;z-index:30;padding:16px}
+.modal>div{background:var(--surface);border-radius:14px;max-width:560px;width:100%;max-height:90vh;overflow:auto;padding:20px;box-shadow:0 20px 50px rgba(0,0,0,.3)}
+.form{display:grid;gap:12px}.form label{display:grid;gap:4px;font-weight:600;font-size:13px}.form .row{display:flex;gap:12px;flex-wrap:wrap}.form .row>label{flex:1;min-width:150px}
+.ok{background:var(--ok-bg);color:var(--ok);border-radius:10px;padding:10px 14px;margin-bottom:12px;font-weight:600}
+.demo{position:fixed;right:14px;bottom:12px;background:#fff3c4;color:#7a5b00;border:1px solid #e6cf7a;border-radius:999px;padding:4px 12px;font-size:12px;font-weight:700;z-index:40}
+.empty{color:var(--muted);padding:12px 0}
+.scells{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:10px;margin:10px 0 14px}
+.sc{border:1px solid var(--line);border-radius:10px;padding:10px 12px;background:var(--surface)}
+svg text{fill:var(--muted);font-size:10.5px;font-family:inherit}
+.donutwrap{display:flex;gap:18px;align-items:center;flex-wrap:wrap}
+@media(max-width:640px){.page{padding:14px 12px 70px}.hb{grid-template-columns:100px 1fr 90px}.top{padding:8px 12px}}
+</style>
+</head>
+<body>
+<div class="app">
+ <aside class="side">
+  <div class="brand"><div class="logo">PC</div>Production Control</div>
+  <span class="env">DEMO</span>
+  <div id="nav"></div>
+  <div class="foot">v2.2 · sample data only</div>
+ </aside>
+ <div class="main">
+  <div class="top"><div class="crumb" id="crumb"></div><div class="sp"></div>
+   <label>Cell <select id="cellSel"></select></label>
+   <label>Date <input type="date" id="dateSel" value="2026-11-09" disabled title="Fixed for the demo"></label>
+   <button class="bell" id="bell" title="Overdue items">🔔<i id="bellN">0</i></button>
+   <div class="who"><div class="av">D</div>Demo manager</div></div>
+  <div class="page" id="page"></div>
+ </div>
+</div>
+<div class="demo">DEMO · sample data only</div>
+<div id="modal"></div>
+
+<script>
+(function(){
+
+'use strict';
+/* ================= sample data: everything below is invented ================= */
+function rng(a){return function(){a|=0;a=a+0x6D2B79F5|0;var t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+var R=rng(20261109),ri=function(a,b){return a+Math.floor(R()*(b-a+1))},pick=function(a){return a[Math.floor(R()*a.length)]};
+var TODAY='2026-11-09',NOW_MIN=10*60+32;
+function addDays(d,n){var x=new Date(d+'T00:00:00Z');x.setUTCDate(x.getUTCDate()+n);return x.toISOString().slice(0,10)}
+function daysBetween(a,b){return Math.round((new Date(b)-new Date(a))/864e5)}
+var MON=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+function dd(d){return d.slice(8)+' '+MON[+d.slice(5,7)-1]}
+function esc(s){return String(s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+function hh(x){var h=0;for(var i=0;i<x.length;i++)h=(h*31+x.charCodeAt(i))>>>0;return h}
+function fmtMin(m){m=Math.round(m);if(m<60)return m+' min';var h=Math.floor(m/60);return h+' h '+(m%60?m%60+' min':'')}
+function hm(m){m=((m%1440)+1440)%1440;return ('0'+Math.floor(m/60)).slice(-2)+':'+('0'+m%60).slice(-2)}
+
+var CELLS=[{id:'1',name:'Cell 1'},{id:'2',name:'Cell 2'},{id:'3',name:'Cell 3'}];
+var STAGES=[{n:'CNC 1',cyc:6.2},{n:'CNC 2',cyc:14.5},{n:'CNC 3',cyc:24.8},{n:'CNC 4',cyc:29}];
+var PEOPLE=['Ana R','Ben T','Dara M','Eli N','Faye O','Hana Q','Ivo S','Kai V','Lena P','Milo C'];
+var TDESC=[['Face mill D50',900],['End mill D12 rough',450],['End mill D8 finish',300],['Drill D6',600],['Reamer D6',500],['Chamfer mill',700]];
+var FORMS=[
+ {k:'correction-entry',n:'Correction Entry',wait:'Correction approval',next:'Approve and close',who:'Quality',reason:['Tool 3 length wear +0.004','Work offset updated after re-probe','Tool 5 diameter wear entry']},
+ {k:'tool-change',n:'Tool Change',wait:'Tool change',next:'Replace the tool and log it',who:'Operator',reason:['Tool past life limit','Tool broken','Chipped edge']},
+ {k:'probe-calibration',n:'Probe Calibration',wait:'Probe calibration',next:'Calibrate and log it',who:'Cell lead',reason:['Probe touch-points past limit','Stylus change']},
+ {k:'pivot-calibration',n:'Pivot Calibration',wait:'Pivot calibration',next:'Calibrate and log it',who:'Cell lead',reason:['Pivot cycle due','Geometry check after crash']},
+ {k:'fixture-update',n:'Fixture Update',wait:'Fixture update',next:'Update the fixture',who:'Cell lead',reason:['Clamp wear, re-torque and shim','New fixture plate to load']},
+ {k:'machine-maintenance',n:'Machine Maintenance',wait:'Maintenance',next:'Maintenance to attend',who:'Maintenance',reason:['Coolant pump noise','Spindle warm-up alarm','Chip conveyor jam']},
+ {k:'machine-calibration',n:'Machine Calibration',wait:'Machine calibration',next:'Calibrate and log it',who:'Maintenance',reason:['Annual geometry check','Ballbar check after crash']},
+ {k:'stoppage-gap',n:'Stoppage / Gap',wait:'Stoppage',next:'Close the ticket',who:'Production incharge',reason:['Waiting for material','No operator on shift','Waiting for program']},
+ {k:'quality-ticket',n:'Quality Ticket',wait:'Quality report',next:'Quality to report',who:'Quality',reason:['Bore out of tolerance','Surface finish rejected','Height drifting high']}
+];
+var S={machines:[],items:[],entries:[],prod:[],cell:'',view:'dashboard',arg:'',range:30,asof:'today',asTable:false,open:{ov:1,tc:1},notice:'',tfilt:''};
+
+function build(){
+  var id=0,i;
+  CELLS.forEach(function(c){STAGES.forEach(function(st,si){['A','B','C','D'].forEach(function(l){
+    id++;var m={id:id,code:'C'+c.id+'-CNC'+(si+1)+'-'+l,cell:c.id,stage:st.n,stageIdx:si,state:'run',reason:'',since:addDays(TODAY,-ri(1,12)),hist:[]};
+    S.machines.push(m);
+    TDESC.forEach(function(t,ti){var used=Math.round(t[1]*lvl());S.items.push({kind:'Tool',m:m.code,cell:c.id,stage:st.n,code:'TL-'+(si+1)+('0'+(ti+1)).slice(-2),desc:t[0],used:used,limit:t[1],upd:addDays(TODAY,-ri(0,3))})});
+    S.items.push({kind:'Probe',m:m.code,cell:c.id,stage:st.n,code:'PR-'+(si+1)+l,desc:'Touch probe',used:Math.round(150*lvl()),limit:150,upd:addDays(TODAY,-ri(0,3))});
+    S.items.push({kind:'Fixture',m:m.code,cell:c.id,stage:st.n,code:'FX-'+(si+1)+l,desc:'Clamp fixture '+(si+1)+l,used:Math.round(2000*lvl()),limit:2000,upd:addDays(TODAY,-ri(0,3))});
+    var last=addDays(TODAY,-(R()<.1?ri(31,36):R()<.2?ri(25,30):ri(0,24)));S.items.push({kind:'Pivot',m:m.code,cell:c.id,stage:st.n,code:'PV-'+(si+1)+l,desc:'Rotary pivot '+(si+1)+l,last:last,due:addDays(last,30)})
+  })})});
+  genEntries();
+  /* machine stop history */
+  S.machines.forEach(function(m){var k=ri(0,3);for(var j=0;j<k;j++){var d=addDays(TODAY,-ri(1,28)),st=ri(60,900),dur=ri(15,240),f=pick(FORMS);m.hist.push({from:d+' '+hm(st),to:d+' '+hm(st+dur),dur:dur,reason:f.wait,ticket:'#'+(4000+ri(1,900))})}m.hist.sort(function(a,b){return a.from<b.from?1:-1})});
+  /* production days */
+  for(i=89;i>=0;i--){var dt=addDays(TODAY,-i),wk=new Date(dt+'T00:00:00Z').getUTCDay(),planned=wk===0?ri(500,700):ri(1500,2100),rw=ri(10,Math.round(planned/35)),sc=ri(0,Math.round(planned/70));S.prod.push({d:dt,planned:planned,good:planned-rw-sc-ri(0,60),rework:rw,scrap:sc})}
+  genExtra();sync()}
+function LE(){return S.entries.filter(function(e){return !e.deleted})}
+function sync(){S.machines.forEach(function(m){var t=LE().filter(function(e){return e.machine===m.code&&e.stops&&e.status!=='closed'})[0];m.state=t?'stop':'run';m.reason=t?t.wait:'';m.tid=t?t.id:0;m.mins=t?t.mins:0})}
+var TH={near:80,alert:100,pivotCycle:30,pivotNear:5,overdueDays:3,logsHealth:15};
+function lvl(){var r=R();return r<.05?1.02+R()*.3:r<.17?.82+R()*.17:.1+R()*.68}
+function pct(i){return i.used/i.limit*100}
+function stat(i){if(i.kind==='Pivot'){var d=daysBetween(TODAY,i.due);return d<0?'Alert':d<=TH.pivotNear?'Near limit':'OK'}var p=pct(i);return p>=TH.alert?'Alert':p>=TH.near?'Near limit':'OK'}
+function sc(s){return s==='Alert'?'c-crit':s==='Near limit'?'c-warn':'c-ok'}
+function bc(s){return s==='Alert'?'c':s==='Near limit'?'w':''}
+function vis(a,k){k=k||'cell';return S.cell?a.filter(function(x){return x[k]===S.cell}):a}
+function overdue(e){return e.status!=='closed'&&daysBetween(e.date,TODAY)>=TH.overdueDays}
+function stats(){
+  var ms=vis(S.machines),en=vis(LE()),it=vis(S.items);
+  var open=en.filter(function(e){return e.status!=='closed'}),over=open.filter(overdue);
+  var tools=it.filter(function(i){return i.kind==='Tool'}),pr=it.filter(function(i){return i.kind==='Probe'}),pv=it.filter(function(i){return i.kind==='Pivot'}),fx=it.filter(function(i){return i.kind==='Fixture'});
+  var cnt=function(a,s){return a.filter(function(i){return stat(i)===s}).length};
+  return{ms:ms,en:en,open:open,over:over,stopped:ms.filter(function(m){return m.state==='stop'}),
+    tAl:cnt(tools,'Alert'),tNr:cnt(tools,'Near limit'),pAl:cnt(pr,'Alert'),pNr:cnt(pr,'Near limit'),vAl:cnt(pv,'Alert'),vNr:cnt(pv,'Near limit'),fAl:cnt(fx,'Alert'),fNr:cnt(fx,'Near limit'),
+    dueToday:open.filter(function(e){return e.date===TODAY}).length,
+    quality:en.filter(function(e){return e.form==='quality-ticket'&&e.status!=='closed'&&e.sev==='Danger'}),
+    ng:en.filter(function(e){return e.form==='quality-ticket'&&e.date===TODAY}).length}}
+function alerts(){var o=[];vis(S.items).forEach(function(i){var s=stat(i);if(s==='OK')return;
+  var det=i.kind==='Tool'?'Tool '+i.code+' '+i.desc+' — '+i.used+'/'+i.limit+' parts':i.kind==='Probe'?'Probe '+i.code+' — '+i.used+'/'+i.limit+' touch-points':i.kind==='Fixture'?'Fixture '+i.code+' — '+i.used+'/'+i.limit+' cycles':'Pivot '+i.code+' — '+(daysBetween(TODAY,i.due)<0?'overdue by '+(-daysBetween(TODAY,i.due))+(daysBetween(TODAY,i.due)===-1?' day':' days')+' (was due '+i.due+')':'due in '+daysBetween(TODAY,i.due)+' days');
+  o.push({type:{Tool:'Tool life',Probe:'Probe touch-points',Fixture:'Fixture cycles',Pivot:'Pivot calibration'}[i.kind],cell:i.cell,m:i.m,det:det,lvl:s==='Alert'?'Critical':'Warning',since:addDays(TODAY,-(hh(i.m+i.code)%9))})});
+  o.sort(function(a,b){return (a.lvl==='Critical'?0:1)-(b.lvl==='Critical'?0:1)||(a.since<b.since?-1:1)});return o}
+
+/* ================= pages ================= */
+var PAGES={},ACT={},CHG={},SUB={};
+function I(v,l,a){return {v:v,a:a||'',l:l}}
+var NAV=[
+ {id:'ov',t:'Overview',i:[I('dashboard','Dashboard'),I('machines','Machines'),I('tickets','Open Tickets'),I('queue','Quality Queue'),I('forms','Forms')]},
+ {id:'tc',t:'Tools & calibration',i:[I('tool','Tool Life'),I('probe','Probe Calibration'),I('pivot','Pivot Calibration'),I('fixture','Fixture Fitness')]},
+ {id:'lf',t:'Logs & forms',i:[I('log','Correction Entry','correction-entry'),I('log','Tool Change','tool-change'),I('log','Probe Calibration','probe-calibration'),I('log','Pivot Calibration','pivot-calibration'),I('log','Fixture Update','fixture-update'),I('log','Machine Maintenance','machine-maintenance'),I('log','Machine Calibration','machine-calibration'),I('log','Stoppage / Gap','stoppage-gap'),I('log','Frequency Part Check','frequency-check'),I('log','Issues','issues'),I('log','Root Cause','root-cause'),I('log','Quality Ticket','quality-ticket'),I('deleted','Deleted items')]},
+ {id:'ps',t:'Production & shifts',i:[I('pentry','Production Entry'),I('plog','Production Log'),I('roster','Shift Roster'),I('people','People'),I('sdash','Shift dashboard')]},
+ {id:'pr',t:'Planning & reports',i:[I('plan','Planning Board'),I('pva','Plan vs Actual'),I('patterns','Patterns'),I('evening','Evening summary'),I('report','Generate report')]},
+ {id:'lb',t:'Libraries',i:[I('lib','Tools library','tool'),I('lib','Probes library','probe'),I('lib','Fixtures library','fixture'),I('lib','Pivots library','pivot'),I('cycle','Cycle Time library'),I('inspect','Inspection Time library'),I('features','Features'),I('freq','Frequency Check Interval')]},
+ {id:'tm',t:'Team',i:[I('tasks','My tasks'),I('chat','Chat'),I('score','Scorecards'),I('perf','Performance')]},
+ {id:'ad',t:'Admin',i:[I('fields','Field settings'),I('thresh','Threshold settings'),I('users','Users'),I('perms','Role Permissions'),I('layouts','Dashboard Layouts'),I('activity','Activity Log')]}
+];
+function go(v,a){location.hash='#'+v+(a?'/'+encodeURIComponent(a):'')}
+function route(){var h=location.hash.slice(1).split('/');S.view=h[0]||'dashboard';S.arg=decodeURIComponent(h[1]||'');window.scrollTo(0,0);closeModal();draw()}
+function isOn(i){return S.view===i.v&&(i.a===''||S.arg===i.a)||(i.v==='machines'&&S.view==='machine')}
+function curItem(){var r=null;NAV.forEach(function(g){g.i.forEach(function(i){if(isOn(i))r=i})});return r}
+function renderNav(){
+  var st=stats();
+  document.getElementById('nav').innerHTML=NAV.map(function(g){var has=g.i.some(isOn),open=S.open[g.id]||has;return '<div class="grp'+(open?' open':'')+'"><button class="gh" data-g="'+g.id+'">'+g.t+'<span class="chev">›</span></button><div class="items">'+g.i.map(function(i){
+    var pill=i.v==='tickets'&&st.over.length?'<span class="pill">'+st.over.length+'</span>':(i.v==='queue'&&S.queue?'<span class="pill" style="background:var(--blue)">'+(S.queue.freq.length+S.queue.recov.length)+'</span>':'');
+    return '<button class="nav'+(isOn(i)?' on':'')+'" data-go="'+i.v+'" data-arg="'+i.a+'">'+i.l+pill+'</button>'}).join('')+'</div></div>'}).join('');
+  document.getElementById('bellN').textContent=st.over.length}
+function draw(){
+  renderNav();var ci=curItem();
+  document.getElementById('crumb').innerHTML='Production / <b>'+(ci?ci.l:'Dashboard')+'</b>';
+  var f=PAGES[S.view]||PAGES.dashboard;
+  var html;try{html=f()}catch(err){html='<div class="card"><h2>Something went wrong on this page</h2><p class="sub">'+esc(err.message)+'</p></div>';if(window.console)console.error(err)}
+  document.getElementById('page').innerHTML=(S.notice?'<div class="ok">'+esc(S.notice)+'</div>':'')+html;S.notice='';
+  if(S.afterDraw){var f2=S.afterDraw;S.afterDraw=null;f2()}}
+function tile(c,i,n,l,go,h){return '<div class="tile" data-go="'+go+'"><div class="ic '+c+'">'+i+'</div><div><div class="num">'+n+'</div><div class="lab">'+l+'</div>'+(h?'<div class="hint">'+h+'</div>':'')+'</div></div>'}
+
+function pDash(){
+  var s=stats(),al=alerts();
+  var cc=CELLS.filter(function(c){return !S.cell||S.cell===c.id}).map(function(c){var t=LE().filter(function(x){return x.cell===c.id}),o=t.filter(function(x){return x.status!=='closed'}),ov=o.filter(overdue),dn=t.filter(function(x){return x.status==='closed'&&x.date===TODAY});
+    return '<div class="cell'+(ov.length?' red':'')+'" data-cell="'+c.id+'"><b>'+c.name+'</b><div><span class="chip c-open">'+o.length+' open</span><span class="chip c-over">'+ov.length+' overdue</span></div><span class="chip c-done">'+dn.length+' done today</span></div>'}).join('');
+  var attn=s.over.sort(function(a,b){return a.date<b.date?-1:1}).slice(0,6).map(function(e){return '<tr class="click" data-m="'+e.machine+'"><td><b>'+e.machine+'</b><div class="hint">'+e.fn+'</div></td><td>'+esc(e.reason)+'</td><td>'+dd(e.date)+'</td></tr>'}).join('');
+  var by={},tot=0;s.stopped.forEach(function(m){by[m.reason]=(by[m.reason]||0)+m.mins;tot+=m.mins});
+  var reasons=Object.keys(by).sort(function(a,b){return by[b]-by[a]});
+  var sorted=s.stopped.slice().sort(function(a,b){return b.mins-a.mins});
+  var rec=s.en.filter(function(e){return e.status==='closed'&&e.date===TODAY});
+  var chk=s.ms.length*4,chkDone=Math.round(chk*0.31);
+  return '<div class="head"><div><h1>Dashboard</h1><p class="sub">Everything that needs attention today across '+(S.cell?'Cell '+S.cell:'all cells')+'. Click a tile, a cell or a row to open it.</p></div></div>'
+  +'<div class="tiles" data-w="tiles1">'+tile('a','📅',s.dueToday,'Due today','tickets')+tile('r','⚠',s.over.length,'Overdue','tickets')+tile('b','✔',s.en.filter(function(e){return e.status==='in progress'}).length,'Waiting for my verification','tickets')
+  +tile('t','🛡',s.quality.length,'Quality: danger alerts','tickets','CMM '+Math.ceil(s.quality.length*0.6)+' · Equator '+Math.floor(s.quality.length*0.4))+'</div>'
+  +'<div class="two" data-w="cells"><div class="card"><h2>Cells</h2><div class="cells">'+cc+'</div></div><div class="card"><h2>Needs attention</h2>'+(attn?'<div class="tw"><table><tbody>'+attn+'</tbody></table></div>':'<p class="empty">Nothing waiting on you.</p>')+'</div></div>'
+  +'<div class="hint" style="margin:6px 2px 8px">Live · today\'s production day, 06:00 to 06:00</div>'
+  +'<div class="tiles" data-w="tiles2">'+tile('g','⚙',(s.ms.length-s.stopped.length)+' <small>/ '+s.ms.length+'</small>','Machine status','machines',s.stopped.length+' stopped')
+  +tile('r','🛠',s.tAl,'Tool change','tool','past life limit · '+s.tNr+' near')+tile('a','🎯',s.pAl,'Probe overdue','probe','past touch-point limit · '+s.pNr+' near')
+  +tile('r','⟳',s.vAl,'Pivot overdue','pivot','past its cycle · '+s.vNr+' near')+tile('a','🔩',s.fAl,'Fixture overdue','fixture','past cycle limit · '+s.fNr+' near')
+  +tile('t','☑',chkDone+' <small>/ '+chk+'</small>','Today\'s checklist','tickets',(chk-chkDone)+' still to do')+tile('r','✖',s.ng,'NG today',"tickets",s.ng?'logged by Quality':'nothing logged NG today')+'</div>'
+  +'<div class="card" data-w="prod"><div class="head" style="margin:0"><div><h2>Production vs rejects</h2><p class="sub" style="margin:2px 0 8px">Planned against what the parts turned out to be, to '+TODAY+'. Good, reworkable and scrapped come from the severity already on each quality ticket.</p></div><div class="tabs">'
+  +[7,30,90].map(function(r){return '<button class="tab'+(S.range===r?' on':'')+'" data-range="'+r+'">'+r+'d</button>'}).join('')+'<button class="tab'+(S.asTable?' on':'')+'" data-astable="1">View as table</button></div></div>'+(S.asTable?prodTable():prodChart())+'</div>'
+  +'<div class="two e" data-w="activity"><div class="card"><h2>Recent activity</h2><p class="sub" style="margin:2px 0 8px">Closed and completed on '+TODAY+'.</p>'+(rec.length?'<div class="tw"><table><tbody>'+rec.map(function(e){return '<tr class="click" data-m="'+e.machine+'"><td><b>'+e.machine+'</b></td><td>'+e.fn+'</td><td>'+esc(e.reason)+'</td><td><span class="chip c-done">Closed '+e.time+'</span></td></tr>'}).join('')+'</tbody></table></div>':'<p class="empty">Nothing was closed on this day.</p>')+'</div>'
+  +'<div class="card"><h2>Machine downtime</h2><p class="sub" style="margin:2px 0 8px">Stopped time on '+TODAY+', worst first · '+tot+' minutes in total.</p>'+(sorted.length?'<div class="tw"><table><tbody>'+sorted.map(function(m){return '<tr class="click" data-m="'+m.code+'"><td><b>'+m.code+'</b></td><td>'+m.reason+'</td><td><span class="chip c-crit">Still stopped</span></td><td style="text-align:right">'+m.mins+' min</td></tr>'}).join('')+'</tbody></table></div>':'<p class="empty">No machine is stopped.</p>')+'</div></div>'
+  +'<div class="card" data-w="reasons"><h2>Downtime by reason</h2><p class="sub" style="margin:2px 0 8px">Where the day\'s stopped time went, from each machine\'s own status history.</p>'+donut(by,reasons,tot)+'</div>'
+  +'<div class="card" data-w="alerts"><h2>Alerts</h2><p class="sub" style="margin:2px 0 8px">'+al.length+' open · '+al.filter(function(a){return a.lvl==='Critical'}).length+' critical · '+al.filter(function(a){return a.lvl!=='Critical'}).length+' warning</p><div class="tw"><table><thead><tr><th>Type</th><th>Cell</th><th>Machine</th><th>Detail</th><th>Status</th><th>Since</th></tr></thead><tbody>'
+  +al.slice(0,40).map(function(a){return '<tr class="click" data-m="'+a.m+'"><td>'+a.type+'</td><td>Cell '+a.cell+'</td><td><b>'+a.m+'</b></td><td>'+a.det+'</td><td><span class="chip '+(a.lvl==='Critical'?'c-crit':'c-warn')+'">'+a.lvl+'</span></td><td>'+a.since+'</td></tr>'}).join('')+'</tbody></table></div></div>'}
+function donut(by,reasons,tot){
+  if(!tot)return '<p class="empty">Nothing stopped.</p>';
+  var cols=['#12a58c','#3a7bd5','#f0a63a','#9b59b6','#e05263','#7e8f9c','#16b39a','#ec835a'],R0=70,C=2*Math.PI*R0,off=0,segs='';
+  reasons.forEach(function(r,i){var f=by[r]/tot;segs+='<circle r="'+R0+'" cx="90" cy="90" fill="none" stroke="'+cols[i%cols.length]+'" stroke-width="30" stroke-dasharray="'+(f*C)+' '+C+'" stroke-dashoffset="'+(-off*C)+'" transform="rotate(-90 90 90)"><title>'+r+': '+by[r]+' min</title></circle>';off+=f});
+  return '<div class="donutwrap"><svg viewBox="0 0 180 180" width="190" role="img" aria-label="Downtime by reason">'+segs+'<text x="90" y="88" text-anchor="middle" style="font-size:22px;font-weight:700;fill:var(--ink)">'+tot+'</text><text x="90" y="106" text-anchor="middle">minutes</text></svg><div style="flex:1;min-width:220px">'+reasons.map(function(r,i){return '<div class="hb" style="grid-template-columns:18px 1fr 120px"><i style="width:12px;height:12px;border-radius:3px;background:'+cols[i%cols.length]+'"></i><span>'+r+'</span><span style="text-align:right">'+by[r]+' min · '+Math.round(by[r]/tot*100)+'%</span></div>'}).join('')+'</div></div>'}
+function prodChart(){
+  var d=S.prod.slice(-S.range),W=900,H=250,L=44,B=26,T=10,max=0;d.forEach(function(x){max=Math.max(max,x.planned)});max=Math.ceil(max/500)*500;
+  var bw=(W-L-8)/d.length,y=function(v){return T+(H-T-B)*(1-v/max)},out='';
+  for(var g=0;g<=4;g++){var v=max/4*g;out+='<line x1="'+L+'" x2="'+W+'" y1="'+y(v)+'" y2="'+y(v)+'" stroke="var(--grid)"/><text x="'+(L-6)+'" y="'+(y(v)+3)+'" text-anchor="end">'+Math.round(v)+'</text>'}
+  d.forEach(function(x,i){var X=L+i*bw+bw*.15,w=bw*.7,k=(H-T-B)/max,base=H-B,gh=k*x.good,rh=k*x.rework,sh=k*x.scrap;
+    out+='<g><title>'+x.d+' · planned '+x.planned+' · good '+x.good+' · rework '+x.rework+' · scrap '+x.scrap+'</title><rect x="'+X+'" y="'+(base-gh)+'" width="'+w+'" height="'+gh+'" fill="var(--accent)" rx="1.5"/><rect x="'+X+'" y="'+(base-gh-rh)+'" width="'+w+'" height="'+rh+'" fill="var(--warn)"/><rect x="'+X+'" y="'+(base-gh-rh-sh)+'" width="'+w+'" height="'+sh+'" fill="var(--crit)"/></g>';
+    var ev=Math.ceil(d.length/8);if(i%ev===0)out+='<text x="'+(X+w/2)+'" y="'+(H-8)+'" text-anchor="middle">'+dd(x.d)+'</text>'});
+  var t=sumProd(d);
+  return '<svg viewBox="0 0 '+W+' '+H+'" width="100%" role="img" aria-label="Production against rejects">'+out+'</svg><div class="legend"><span><i style="background:var(--accent)"></i>Good '+t.g+' ('+Math.round(t.g/t.p*100)+'%)</span><span><i style="background:var(--warn)"></i>Rework '+t.r+'</span><span><i style="background:var(--crit)"></i>Scrap '+t.s+'</span><span>Planned '+t.p+'</span></div>'}
+function sumProd(d){return d.reduce(function(a,x){a.p+=x.planned;a.g+=x.good;a.r+=x.rework;a.s+=x.scrap;return a},{p:0,g:0,r:0,s:0})}
+function prodTable(){var d=S.prod.slice(-S.range).slice().reverse();return '<div class="tw"><table><thead><tr><th>Day</th><th>Planned</th><th>Good</th><th>Rework</th><th>Scrap</th><th>Yield</th></tr></thead><tbody>'+d.map(function(x){return '<tr><td>'+x.d+'</td><td>'+x.planned+'</td><td>'+x.good+'</td><td>'+x.rework+'</td><td>'+x.scrap+'</td><td>'+Math.round(x.good/x.planned*100)+'%</td></tr>'}).join('')+'</tbody></table></div>'}
+
+function pMachines(){
+  var stg=S.stg||'',show=S.show||'all';
+  var ms=vis(S.machines).filter(function(m){return (!stg||m.stage===stg)&&(show==='all'||(show==='stopped'&&m.state==='stop')||(show==='running'&&m.state==='run'))});
+  var html='<div class="head"><div><h1>Machines</h1><p class="sub">Every machine, live. Open one to see its tools, probes, fixtures and pivots, usage, and calibration dates for pivots. This page is read-only.</p></div></div>'
+   +'<div class="card"><div class="filters"><label>Cell<select data-f="cell"><option value="">All cells</option>'+CELLS.map(function(c){return '<option value="'+c.id+'"'+(S.cell===c.id?' selected':'')+'>Cell '+c.id+'</option>'}).join('')+'</select></label><label>Stage<select data-f="stg"><option value="">All stages</option>'+STAGES.map(function(s){return '<option'+(stg===s.n?' selected':'')+'>'+s.n+'</option>'}).join('')+'</select></label><label>Show<select data-f="show">'+[['all','All machines'],['stopped','Stopped only'],['running','Running only']].map(function(o){return '<option value="'+o[0]+'"'+(show===o[0]?' selected':'')+'>'+o[1]+'</option>'}).join('')+'</select></label></div></div>';
+  CELLS.filter(function(c){return !S.cell||S.cell===c.id}).forEach(function(c){var list=ms.filter(function(m){return m.cell===c.id});if(!list.length)return;
+    html+='<div class="card"><h2>Cell '+c.id+' <span class="hint">('+list.length+' machines)</span></h2><div class="tw tall"><table><thead><tr><th>Machine</th><th>Stage</th><th>Status</th><th>Since</th><th>Open tickets</th><th>Worst tool life</th></tr></thead><tbody>'
+    +list.map(function(m){var o=LE().filter(function(e){return e.machine===m.code&&e.status!=='closed'}).length,w=Math.max.apply(null,S.items.filter(function(i){return i.m===m.code&&i.kind==='Tool'}).map(pct));
+      return '<tr class="click" data-m="'+m.code+'"><td><b>'+m.code+'</b></td><td>'+m.stage+'</td><td>'+(m.state==='stop'?'<span class="chip c-crit">Stopped · '+m.reason+'</span>':'<span class="chip c-ok">Running</span>')+'</td><td>'+(m.state==='stop'?TODAY:m.since)+'</td><td>'+o+'</td><td><div class="bar"><i class="'+(w>=100?'c':w>=80?'w':'')+'" style="width:'+Math.min(100,Math.round(w))+'%"></i></div></td></tr>'}).join('')+'</tbody></table></div></div>'});
+  return html}
+function pMachine(){
+  var m=S.machines.filter(function(x){return x.code===S.arg})[0];if(!m)return '<p class="empty">Machine not found.</p>';
+  var it=S.items.filter(function(i){return i.m===m.code}),en=LE().filter(function(e){return e.machine===m.code}).sort(function(a,b){return a.date<b.date?1:a.date>b.date?-1:b.opened-a.opened}).slice(0,12);
+  var hist=m.hist.slice();if(m.state==='stop')hist.unshift({from:TODAY+' '+hm(NOW_MIN-m.mins),to:'still stopped',dur:m.mins,reason:m.reason,ticket:'#'+m.tid});
+  var tot=hist.reduce(function(a,h){return a+h.dur},0);
+  return '<div class="head"><div><h1>'+m.code+'</h1><p class="sub">Cell '+m.cell+' (C'+m.cell+') · '+m.stage+' · <a data-go="machines">All machines</a></p></div></div>'
+  +'<div class="stat"><div><span class="lab">Status</span><b>'+(m.state==='stop'?'<span class="chip c-crit">Stopped</span>':'<span class="chip c-ok">Running</span>')+'</b></div><div><span class="lab">'+(m.state==='stop'?'Stopped for':'Running since')+'</span><b>'+(m.state==='stop'?fmtMin(m.mins):dd(m.since))+'</b></div><div><span class="lab">Open tickets</span><b>'+en.filter(function(e){return e.status!=='closed'}).length+'</b></div><div><span class="lab">Standard cycle time</span><b>'+STAGES[m.stageIdx].cyc+' min</b></div></div>'
+  +'<div class="card" id="downtime"><h2>Downtime</h2><p class="sub" style="margin:2px 0 8px">Every time this machine stopped in the last 30 days, newest first, with the ticket that stopped it · '+fmtMin(tot)+' in total. A stop runs until the machine is back to Running, however many steps that took.</p>'
+  +'<div class="tw"><table><thead><tr><th>Stopped</th><th>Back running</th><th>Duration</th><th>Reason</th><th>Ticket</th></tr></thead><tbody>'+(hist.map(function(h){return '<tr><td>'+h.from+'</td><td>'+(h.to==='still stopped'?'<span class="chip c-crit">still stopped</span>':h.to)+'</td><td>'+fmtMin(h.dur)+'</td><td>'+h.reason+'</td><td>'+h.ticket+'</td></tr>'}).join('')||'<tr><td colspan="5" class="empty">No stops in this period.</td></tr>')+'</tbody></table></div></div>'
+  +'<div class="two e" data-w="activity"><div class="card"><h2>Recent activity</h2><div class="tw"><table><thead><tr><th>Date</th><th>Form</th><th>Status</th><th>Detail</th></tr></thead><tbody>'+en.map(function(e){return '<tr><td>'+dd(e.date)+'</td><td>'+e.fn+'</td><td><span class="chip '+(e.status==='closed'?'c-done':e.status==='open'?'c-open':'c-prog')+'">'+e.status+'</span></td><td>'+esc(e.reason)+'</td></tr>'}).join('')+'</tbody></table></div></div>'
+  +'<div class="card"><h2>Tools, probes, fixtures &amp; pivots</h2><div class="tw"><table><thead><tr><th>Kind</th><th>Code</th><th>Description</th><th>Usage / calibration</th><th>Status</th></tr></thead><tbody>'+it.map(function(i){var s=stat(i);return '<tr><td>'+i.kind+'</td><td>'+i.code+'</td><td>'+i.desc+'</td><td>'+(i.kind==='Pivot'?'due '+i.due:i.used+' / '+i.limit)+'</td><td><span class="chip '+sc(s)+'">'+s+'</span></td></tr>'}).join('')+'</tbody></table></div></div></div>'}
+function pTickets(){
+  var en=vis(LE()).filter(function(e){return e.status!=='closed'&&e.stops}).sort(function(a,b){return b.mins-a.mins});
+  return '<div class="head"><div><h1>Open Tickets</h1><p class="sub">Every machine currently blocked and why, pulled live from Correction Entry, Tool Change, Probe and Pivot Calibration, Quality Ticket and the other forms, so nothing has to be pieced together by hand.</p></div></div>'
+  +'<div class="card"><div class="filters"><label>Cell<select data-f="cell"><option value="">All cells</option>'+CELLS.map(function(c){return '<option value="'+c.id+'"'+(S.cell===c.id?' selected':'')+'>Cell '+c.id+'</option>'}).join('')+'</select></label></div></div>'
+  +'<div class="card"><div class="tw tall"><table><thead><tr><th>Cell</th><th>Machine</th><th>Waiting for</th><th>Reason</th><th>Next step</th><th>Accountable</th><th>Opened by</th><th>Stopped for</th></tr></thead><tbody>'
+  +(en.map(function(e){return '<tr class="click" data-m="'+e.machine+'"><td>Cell '+e.cell+'</td><td><b>'+e.machine+'</b></td><td><span class="chip c-warn">'+e.wait+'</span></td><td>'+esc(e.reason)+'</td><td>'+e.next+'</td><td>'+e.who+'</td><td>'+e.by+'</td><td><b>'+fmtMin(e.mins)+'</b></td></tr>'}).join('')||'<tr><td colspan="8" class="empty">No machine is blocked.</td></tr>')+'</tbody></table></div></div>'}
+function pTrack(kind){
+  var meta={Tool:['Tool Tracking','Lives used vs. lives limit. Near-limit and alert thresholds are admin-editable.','Tool code','Lives used','Add new tool'],Probe:['Probe Tracking','Touch points used vs. touch point limit. Near-limit and alert thresholds are admin-editable.','Probe code','Touch points used','Add new probe'],Pivot:['Pivot Tracking','Each pivot is calibrated every 30 days. It shows as near due when 5 days or fewer are left, and overdue once the due date has passed. Both numbers are admin-editable.','Pivot code','Last calibrated','Add new pivot'],Fixture:['Fixture Tracking','Cycles used vs. cycle limit. Near-limit and alert thresholds are admin-editable.','Fixture code','Cycles used','Add new fixture']}[kind];
+  var all=vis(S.items).filter(function(i){return i.kind===kind});
+  var fl=S.tfilt;var rows=all.filter(function(i){return !fl||stat(i)===fl});
+  rows.sort(function(a,b){var o={Alert:0,'Near limit':1,OK:2};return o[stat(a)]-o[stat(b)]||(kind==='Pivot'?(a.due<b.due?-1:1):pct(b)-pct(a))});
+  var cards=CELLS.filter(function(c){return !S.cell||S.cell===c.id}).map(function(c){var a=all.filter(function(i){return i.cell===c.id}),n=function(s){return a.filter(function(i){return stat(i)===s}).length};
+    return '<div class="sc"><b>Cell '+c.id+'</b> <span class="hint">'+a.length+' '+kind.toLowerCase()+'s</span><div><span class="chip c-ok">'+n('OK')+' OK</span><span class="chip c-warn">'+n('Near limit')+' near</span><span class="chip c-crit">'+n('Alert')+' alert</span></div></div>'}).join('');
+  var th=kind==='Pivot'?'<th>Cell</th><th>Assigned to</th><th>'+meta[2]+'</th><th>Description</th><th>Last calibrated</th><th>Next due</th><th>Days left</th><th>Status</th>':'<th>Cell</th><th>Assigned to</th><th>'+meta[2]+'</th><th>Description</th><th>'+meta[3]+'</th><th>Status</th><th>Last updated</th>';
+  var body=rows.slice(0,120).map(function(i){var s=stat(i);
+    if(kind==='Pivot'){var dl=daysBetween(TODAY,i.due);return '<tr class="click" data-m="'+i.m+'"><td>Cell '+i.cell+'</td><td>'+i.m+'</td><td><b>'+i.code+'</b></td><td>'+i.desc+'</td><td>'+i.last+'</td><td>'+i.due+'</td><td>'+dl+'</td><td><span class="chip '+sc(s)+'">'+(s==='Alert'?'Overdue':s==='Near limit'?'Near due':'OK')+'</span></td></tr>'}
+    return '<tr class="click" data-m="'+i.m+'"><td>Cell '+i.cell+'</td><td>'+i.m+'</td><td><b>'+i.code+'</b></td><td>'+i.desc+'</td><td><div style="display:flex;gap:8px;align-items:center"><div class="bar" style="width:110px"><i class="'+bc(s)+'" style="width:'+Math.min(100,Math.round(pct(i)))+'%"></i></div><span>'+i.used+' / '+i.limit+'</span></div></td><td><span class="chip '+sc(s)+'">'+s+'</span></td><td>'+i.upd+'</td></tr>'}).join('');
+  return '<div class="head"><div><h1>'+meta[0]+'</h1><p class="sub">'+meta[1]+'</p></div><button class="btn p" data-add="'+kind+'">+ '+meta[4]+'</button></div>'
+  +'<div class="card"><div class="filters"><label>As of date<input type="date" value="'+TODAY+'" disabled></label>'+['Today','This week','This month'].map(function(t,i){return '<button class="tab'+(S.asof===['today','week','month'][i]?' on':'')+'" data-asof="'+['today','week','month'][i]+'">'+t+'</button>'}).join('')
+  +'<label>Status<select data-f="tfilt"><option value="">All</option><option'+(fl==='Alert'?' selected':'')+'>Alert</option><option'+(fl==='Near limit'?' selected':'')+'>Near limit</option><option'+(fl==='OK'?' selected':'')+'>OK</option></select></label></div></div>'
+  +'<h2>'+kind+' status by cell</h2><div class="scells">'+cards+'</div>'
+  +'<div class="card"><h2>'+kind+'s <span class="hint">('+rows.length+')</span></h2><div class="tw tall"><table><thead><tr>'+th+'</tr></thead><tbody>'+(body||'<tr><td colspan="8" class="empty">Nothing matches.</td></tr>')+'</tbody></table></div></div>'}
+
+function addModal(kind){
+  var pivot=kind==='Pivot';
+  document.getElementById('modal').innerHTML='<div class="modal" data-close><div><div class="head"><h2>Add new '+kind.toLowerCase()+'</h2><button class="btn sm" data-close>Close</button></div><form class="form" id="addForm" data-kind="'+kind+'"><div class="row"><label>Machine<select name="m">'+S.machines.map(function(m){return '<option>'+m.code+'</option>'}).join('')+'</select></label><label>Code<input type="text" name="code" required placeholder="'+(kind==='Tool'?'TL-199':kind==='Probe'?'PR-99':kind==='Pivot'?'PV-99':'FX-99')+'"></label></div><label>Description<input type="text" name="desc" required></label>'+(pivot?'<label>Last calibrated<input type="date" name="last" value="'+TODAY+'"></label>':'<label>'+(kind==='Tool'?'Lives limit':kind==='Probe'?'Touch-point limit':'Cycle limit')+'<input type="number" name="limit" value="'+(kind==='Tool'?500:kind==='Probe'?150:2000)+'" min="1"></label>')+'<div><button class="btn p" type="submit">Add '+kind.toLowerCase()+'</button></div></form></div></div>'}
+
+/* ================= events ================= */
+document.addEventListener('click',function(e){
+  var el=e.target.closest('[data-go],[data-g],[data-cell],[data-m],[data-range],[data-astable],[data-asof],[data-add],[data-close],[data-act]');if(!el)return;
+  if(el.hasAttribute('data-close')){if(e.target===el||el.tagName==='BUTTON')closeModal();return}
+  if(el.dataset.act){e.stopPropagation();if(ACT[el.dataset.act])ACT[el.dataset.act](el,e);return}
+  if(el.dataset.g){S.open[el.dataset.g]=!S.open[el.dataset.g];return renderNav()}
+  if(el.dataset.add)return addModal(el.dataset.add);
+  if(el.dataset.m)return go('machine',el.dataset.m);
+  if(el.dataset.cell){S.cell=el.dataset.cell;document.getElementById('cellSel').value=S.cell;return draw()}
+  if(el.dataset.range){S.range=+el.dataset.range;return draw()}
+  if(el.dataset.astable){S.asTable=!S.asTable;return draw()}
+  if(el.dataset.asof){S.asof=el.dataset.asof;return draw()}
+  if(el.dataset.go)return go(el.dataset.go,el.dataset.arg||'')});
+document.addEventListener('change',function(e){var t=e.target,d=t.dataset||{};
+  if(d.chg&&CHG[d.chg])return CHG[d.chg](t,e);
+  var f=d.f;if(!f)return;
+  if(f==='cell'){S.cell=t.value;document.getElementById('cellSel').value=S.cell}else S[f]=t.value;draw()});
+document.addEventListener('input',function(e){var t=e.target;if(t.dataset&&t.dataset.inp&&CHG[t.dataset.inp])CHG[t.dataset.inp](t,e)});
+document.addEventListener('submit',function(e){var id=e.target.id;
+  if(e.target.dataset&&e.target.dataset.sub&&SUB[e.target.dataset.sub]){e.preventDefault();return SUB[e.target.dataset.sub](e.target)}
+  if(id!=='addForm')return;e.preventDefault();var f=new FormData(e.target),k=e.target.dataset.kind,m=S.machines.filter(function(x){return x.code===f.get('m')})[0];
+  var it={kind:k,m:m.code,cell:m.cell,stage:m.stage,code:f.get('code'),desc:f.get('desc'),upd:TODAY};
+  if(k==='Pivot'){it.last=f.get('last');it.due=addDays(it.last,30)}else{it.used=0;it.limit=+f.get('limit')||1}
+  S.items.push(it);logAct('Item added','Cell '+m.cell,m.code,it.code,k+' added');closeModal();S.notice=k+' '+it.code+' added to '+m.code+'.';draw()});
+(function(){var sel=document.getElementById('cellSel');sel.innerHTML='<option value="">All cells</option>'+CELLS.map(function(c){return '<option value="'+c.id+'">Cell '+c.id+'</option>'}).join('');sel.onchange=function(){S.cell=sel.value;draw()}})();
+document.getElementById('bell').onclick=function(){go('tickets')};
+
+
+/* ================= shared helpers ================= */
+PAGES.dashboard=pDash;PAGES.machines=pMachines;PAGES.machine=pMachine;PAGES.tickets=pTickets;
+PAGES.tool=function(){return pTrack('Tool')};PAGES.probe=function(){return pTrack('Probe')};PAGES.pivot=function(){return pTrack('Pivot')};PAGES.fixture=function(){return pTrack('Fixture')};
+function modal(html,wide){document.getElementById('modal').innerHTML='<div class="modal" data-close><div'+(wide?' style="max-width:760px"':'')+'>'+html+'</div></div>'}
+function closeModal(){document.getElementById('modal').innerHTML=''}
+function mhead(t,sub){return '<div class="head"><div><h2>'+t+'</h2>'+(sub?'<div class="hint">'+sub+'</div>':'')+'</div><button class="btn sm" data-close>Close</button></div>'}
+function opts(list,val,all){return (all?'<option value="">'+all+'</option>':'')+list.map(function(o){var v=Array.isArray(o)?o[0]:o,l=Array.isArray(o)?o[1]:o;return '<option value="'+esc(v)+'"'+(String(val)===String(v)?' selected':'')+'>'+esc(l)+'</option>'}).join('')}
+function cellOpts(v,all){return opts(CELLS.map(function(c){return [c.id,'Cell '+c.id]}),v,all===false?null:'All cells')}
+function stOpts(v,all){return opts(STAGES.map(function(s){return s.n}),v,all===false?null:'All stages')}
+function machOpts(v,all){return opts(S.machines.map(function(m){return m.code}),v,all===false?null:'All machines')}
+function chipFor(st){return '<span class="chip '+(st==='closed'?'c-done':st==='open'?'c-open':st==='in progress'?'c-prog':'c-idle')+'">'+st+'</span>'}
+function dlCsv(name,rows){var csv=rows.map(function(r){return r.map(function(c){c=String(c==null?'':c);return /[",\n]/.test(c)?'"'+c.replace(/"/g,'""')+'"':c}).join(',')}).join('\r\n');
+  var a=document.createElement('a');a.href=URL.createObjectURL(new Blob(['﻿'+csv],{type:'text/csv'}));a.download=name;document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(a.href);a.remove()},500)}
+function logAct(ev,cell,mach,code,desc){S.activity.unshift({t:TODAY+' '+hm(NOW_MIN+(S.tick=(S.tick||0)+1)),ev:ev,cell:cell||'',m:mach||'',code:code||'',desc:desc||'',user:'Demo manager'})}
+function page(h,sub,right){return '<div class="head"><div><h1>'+h+'</h1><p class="sub">'+(sub||'')+'</p></div>'+(right||'')+'</div>'}
+function filt(inner){return '<div class="card"><div class="filters">'+inner+'</div></div>'}
+function lbl(t,c){return '<label>'+t+c+'</label>'}
+function tbl(heads,rows,cls){return '<div class="tw '+(cls||'')+'"><table><thead><tr>'+heads.map(function(h){return '<th>'+h+'</th>'}).join('')+'</tr></thead><tbody>'+(rows.join('')||'<tr><td colspan="'+heads.length+'" class="empty">Nothing here yet.</td></tr>')+'</tbody></table></div>'}
+function ageOf(e){var d=daysBetween(e.date,TODAY);return d<=0?'today':d+' d'}
+ACT.noop=function(el){S.notice=el.dataset.msg||'This is a demo, so that action is switched off.';draw()};
+ACT.toggleSide=function(){};
+
+
+/* ================= forms: definitions, sample entries, logs ================= */
+var FEATS=['FAI 12','FAI 24','FAI 31','IP 3','IP 7','KEY 2','Bore D12','Slot width','Flatness A','Height H1','Thread M6','Edge break'];
+var PARTS=['DEMO-PART-A','DEMO-PART-B','DEMO-PART-C'];
+function F(k,l,t,o,def){return{k:k,l:l,t:t||'text',o:o,def:def}}
+FORMS.push({k:'frequency-check',n:'Frequency Part Check',wait:'Frequency check',next:'Quality to report',who:'Quality',reason:['Scheduled frequency check']},
+ {k:'issues',n:'Issues',wait:'Issue',next:'Raise a root cause',who:'Cell lead',reason:['Repeated alarm on one machine','Program crash near the end of the cycle','Chatter on thin wall']},
+ {k:'root-cause',n:'Root Cause',wait:'Root cause',next:'Close the ticket',who:'Cell lead',reason:['Worn clamp, not tool wear','Coolant concentration low']});
+function FM(k){return FORMS.filter(function(f){return f.k===k})[0]}
+function toolDef(m){var t=S.items.filter(function(i){return i.m===m&&i.kind==='Tool'})[0];return t?t.code:''}
+function itemDef(kind){return function(m){var t=S.items.filter(function(i){return i.m===m&&i.kind===kind})[0];return t?t.code:''}}
+var FDEF={
+ 'correction-entry':{pre:'CE',appr:true,stops:false,btn:'Approve & close',fields:[F('part','Component / Part No.','sel',PARTS),F('issue','Issue found','sel',['Dimension high','Dimension low','Surface mark','Burr on edge']),F('feature','Feature','sel',FEATS),F('ctype','Correction type','sel',['Tool wear offset','Work offset','Tool length','Tool diameter']),F('action','Action taken','text'),F('before','Before correction value','num'),F('after','After correction value','num'),F('by','Corrected by','person'),F('approved','Approved by','person')],cols:['issue','feature','ctype','before','after','by']},
+ 'tool-change':{pre:'TC',stops:true,fields:[F('tool','Tool No.','text',null,toolDef),F('why','Reason for change','sel',['Tool past life limit','Tool broken','Chipped edge','Quality drift']),F('cat','Reason category','sel',['Planned','Unplanned','Quality']),F('run','Actual Parts Run','num'),F('by','Changed by','person')],cols:['tool','why','cat','run','by']},
+ 'probe-calibration':{pre:'PC',stops:true,fields:[F('probe','Probe code','text',null,itemDef('Probe')),F('tp','Touch points at calibration','num'),F('res','Result','sel',['Passed','Passed after re-cal','Stylus replaced']),F('by','Calibrated by','person')],cols:['probe','tp','res','by']},
+ 'pivot-calibration':{pre:'PV',stops:true,fields:[F('pivot','Pivot code','text',null,itemDef('Pivot')),F('dev','Deviation (mm)','num'),F('res','Result','sel',['Passed','Offsets updated','Re-done']),F('by','Calibrated by','person')],cols:['pivot','dev','res','by']},
+ 'fixture-update':{pre:'FU',stops:true,fields:[F('fix','Fixture code','text',null,itemDef('Fixture')),F('utype','Update type','sel',['Re-torque and shim','Locator replaced','New plate loaded']),F('cyc','Cycles at update','num'),F('by','Updated by','person')],cols:['fix','utype','cyc','by']},
+ 'machine-maintenance':{pre:'MM',stops:true,fields:[F('mtype','Maintenance type','sel',['Coolant','Spindle','Chip conveyor','Lubrication','Door / interlock']),F('work','Work done','text'),F('down','Downtime (min)','num'),F('by','Done by','person')],cols:['mtype','work','down','by']},
+ 'machine-calibration':{pre:'MC',stops:true,fields:[F('ctype','Calibration type','sel',['Geometry check','Ballbar test','Laser alignment']),F('res','Result','sel',['In tolerance','Adjusted']),F('next','Next due','date'),F('by','Done by','person')],cols:['ctype','res','next','by']},
+ 'stoppage-gap':{pre:'SG',stops:true,fields:[F('type','Type of stoppage','sel',['No material','No operator','Waiting for program','Power / air','Planned break']),F('hold','What is holding the machine','text'),F('exp','Expected duration (minutes, if known)','num'),F('by','Reported by','person')],cols:['type','hold','exp','by']},
+ 'frequency-check':{pre:'FC',stops:false,fields:[F('check','Which check','sel',['First part','Frequency check','Recovery part N1','Recovery part N2','Recovery part N3']),F('since','Parts since last','num'),F('out','Outcome','sel',['Pass','Pass','Pass','NG','Waiting']),F('corr','Corrections in this cycle','num'),F('by','Pulled by','person'),F('rep','Reported by','person')],cols:['check','since','out','corr','by']},
+ 'issues':{pre:'IS',stops:false,fields:[F('title','Issue title','text'),F('cat','Category','sel',['Machine','Program','Fixture','Tooling','Material']),F('sev','Severity','sel',['Low','Medium','High']),F('desc','Description','area'),F('by','Raised by','person')],cols:['title','cat','sev','by']},
+ 'root-cause':{pre:'RC',stops:false,fields:[F('prob','Problem description','text'),F('rc','Root cause identified','text'),F('ca','Corrective action','text'),F('inv','Investigated by','person'),F('iss','Issue #','text')],cols:['prob','rc','ca','inv','iss']},
+ 'quality-ticket':{pre:'QT',stops:true,qual:true,btn:'Close with a correction',fields:[F('part','Component / Part No.','sel',PARTS),F('fail','Failure type','sel',['Bore out of tolerance','Surface finish','Height drifting high','Thread gauge fail']),F('parts','Parts affected','num'),F('feature','Feature','sel',FEATS),F('sev','Severity','sel',['Danger','Warning']),F('desc','Description','area'),F('by','Reported by','person')],cols:['fail','parts','feature','sev','by']}
+};
+var TXT={action:['Offset updated and re-measured','Re-probed and updated','Tool replaced then offset set'],work:['Cleaned and refilled','Replaced filter','Adjusted and tested'],hold:['Waiting for blank material','Operator on break','Program not released'],title:['Alarm repeats after warm-up','Chatter on thin wall','Burr on slot edge'],desc:['Seen on three parts in a row','Found at the frequency check','Reported by the operator'],prob:['Alarm repeats after warm-up','Burr on slot edge'],rc:['Worn clamp, not tool wear','Coolant concentration low'],ca:['Clamp replaced','Coolant mixed to spec']};
+function genVal(f,m){
+  if(f.t==='sel')return pick(f.o);if(f.t==='person')return pick(PEOPLE);
+  if(f.t==='num'){if(f.k==='before'||f.k==='after'||f.k==='dev')return +(R()*0.06).toFixed(3);if(f.k==='run'||f.k==='cyc')return ri(80,1800);if(f.k==='tp')return ri(120,180);if(f.k==='since')return ri(20,120);if(f.k==='parts')return ri(1,12);return ri(0,5)*(f.k==='exp'||f.k==='down'?15:1)}
+  if(f.t==='date')return addDays(TODAY,ri(20,160));
+  if(f.k==='tool'||f.k==='probe'||f.k==='pivot'||f.k==='fix')return f.def(m.code);
+  if(f.k==='iss')return 'IS-'+ri(1010,1090);
+  return pick(TXT[f.k]||['Sample entry'])}
+function genEntries(){
+  var cnt={};
+  function mk(f,m,off,status,stops,mins){var D=FDEF[f.k];cnt[f.k]=(cnt[f.k]||0)+1;var d=addDays(TODAY,off),op=ri(0,NOW_MIN-30),fv={};
+    D.fields.forEach(function(x){fv[x.k]=genVal(x,m)});
+    var e={id:5000+S.entries.length+1,tno:D.pre+'-'+(1000+cnt[f.k]),form:f.k,fn:f.n,date:d,time:hm(op),shift:op<8*60?'A':op<16*60?'B':'C',cell:m.cell,machine:m.code,stage:m.stage,status:status,stops:stops,reason:pick(f.reason),by:fv.by||fv.rep||pick(PEOPLE),opened:op,mins:mins||0,wait:f.wait,next:f.next,who:f.who,sev:fv.sev||'',closed:status==='closed'?d:'',closedBy:status==='closed'?pick(PEOPLE):'',f:fv,deleted:false,log:[{t:'Opened by '+pick(PEOPLE),d:d}]};
+    if(status==='closed')e.log.push({t:'Closed',d:d});S.entries.push(e);return e}
+  S.mkEntry=mk;
+  var stopForms=FORMS.filter(function(x){return FDEF[x.k].stops});
+  var pool=S.machines.slice();
+  for(var i=0;i<9;i++){var m=pool.splice(ri(0,pool.length-1),1)[0];mk(pick(stopForms),m,0,'open',true,ri(25,370))}
+  FORMS.forEach(function(f){var n=ri(14,24);for(var j=0;j<n;j++){var m2=pick(S.machines),st=R()<.62?'closed':R()<.6?'open':'in progress';mk(f,m2,st==='closed'?-ri(0,29):-Math.floor(R()*R()*6),st,false,0)}});
+  for(i=0;i<8;i++){mk(pick(FORMS),pick(S.machines),0,'closed',false)}
+  S.entries.forEach(function(e,k){if(k%47===3){e.deleted=true;e.delBy=pick(PEOPLE);e.delWhy='Entered on the wrong machine';e.delAt=TODAY}});
+  S.entries.sort(function(a,b){return a.date<b.date?1:a.date>b.date?-1:b.opened-a.opened});S.entries.forEach(function(e,k){e.id=5000+k+1})}
+/* ---------- the connected behaviour: closing a ticket changes the rest of the system ---------- */
+function closeEntry(e,by,note){
+  e.status='closed';e.closed=TODAY;e.closedBy=by||'Demo manager';e.closedAt=hm(NOW_MIN);e.log.push({t:(note||'Closed')+' by '+e.closedBy,d:TODAY});
+  var m=S.machines.filter(function(x){return x.code===e.machine})[0],msg=[];
+  if(e.stops){m.hist.unshift({from:e.date+' '+e.time,to:TODAY+' '+hm(NOW_MIN),dur:e.mins||ri(20,120),reason:e.wait,ticket:'#'+e.tno});msg.push(m.code+' is back to running')}
+  var it=function(k){return S.items.filter(function(i){return i.m===e.machine&&i.kind===k})[0]};
+  if(e.form==='tool-change'){var t=S.items.filter(function(i){return i.m===e.machine&&i.kind==='Tool'&&i.code===e.f.tool})[0]||it('Tool');if(t){t.used=0;t.upd=TODAY;msg.push('tool '+t.code+' life reset to 0')}}
+  if(e.form==='probe-calibration'){var p=it('Probe');if(p){p.used=0;p.upd=TODAY;msg.push('probe touch-points reset')}}
+  if(e.form==='fixture-update'){var x=it('Fixture');if(x){x.used=0;x.upd=TODAY;msg.push('fixture cycles reset')}}
+  if(e.form==='pivot-calibration'){var v=it('Pivot');if(v){v.last=TODAY;v.due=addDays(TODAY,TH.pivotCycle);msg.push('pivot due '+v.due)}}
+  if(e.stops&&(e.form==='tool-change'||e.form==='pivot-calibration'||e.form==='probe-calibration'||e.form==='fixture-update')){S.queue.recov.unshift({id:++S.qid,since:ri(10,50),cell:e.cell,machine:e.machine,part:'Recovery part N1',from:e.fn,by:e.closedBy});msg.push('recovery report added to the Quality Queue')}
+  sync();logAct('Ticket closed','Cell '+e.cell,e.machine,e.tno,e.fn+' closed');return msg}
+function newEntry(fk,machine,vals,stops,note){
+  var f=FM(fk),m=S.machines.filter(function(x){return x.code===machine})[0],D=FDEF[fk];
+  var n=S.entries.filter(function(x){return x.form===fk}).length;
+  var e={id:5000+S.entries.length+1,tno:D.pre+'-'+(1000+n+1),form:fk,fn:f.n,date:TODAY,time:hm(NOW_MIN),shift:'B',cell:m.cell,machine:m.code,stage:m.stage,status:'open',stops:!!stops,reason:vals.reason||pick(f.reason),by:vals.by||vals.rep||'Demo manager',opened:NOW_MIN,mins:0,wait:f.wait,next:f.next,who:f.who,sev:vals.sev||'',closed:'',closedBy:'',f:vals,deleted:false,log:[{t:'Opened by Demo manager',d:TODAY}]};
+  S.entries.unshift(e);sync();logAct('Ticket opened','Cell '+m.cell,m.code,e.tno,f.n+(stops?' (machine stopped)':''));return e}
+/* ---------- log page ---------- */
+function LF(k){S.lf=S.lf||{};return S.lf[k]||(S.lf[k]={m:'',st:'',del:false,page:1,size:10,q:'',cols:null})}
+var COMMON=['Entry ID','Date','Time','Shift','Cell'];
+function colList(k){var D=FDEF[k];return COMMON.concat(D.fields.map(function(x){return x.l}),['Logged at','Logged by','Closed at','Closed by'])}
+function colVal(e,k,c){var D=FDEF[k];
+  if(c==='Entry ID')return e.tno;if(c==='Date')return e.date;if(c==='Time')return e.time;if(c==='Shift')return e.shift;if(c==='Cell')return 'Cell '+e.cell;
+  if(c==='Logged at')return e.date+' '+e.time;if(c==='Logged by')return e.by;if(c==='Closed at')return e.closed?e.closed+' '+(e.closedAt||''):'';if(c==='Closed by')return e.closedBy;
+  var fd=D.fields.filter(function(x){return x.l===c})[0];var v=fd?e.f[fd.k]:'';return v==null?'':v}
+function filtered(k){var L=LF(k);return S.entries.filter(function(e){return e.form===k&&(!!e.deleted===!!L.del)&&(!L.m||e.machine===L.m)&&(!L.st||(L.st==='overdue'?overdue(e):e.status===L.st))&&(!S.cell||e.cell===S.cell)&&(!L.q||JSON.stringify(e.f).toLowerCase().indexOf(L.q.toLowerCase())>-1||e.machine.toLowerCase().indexOf(L.q.toLowerCase())>-1)})}
+PAGES.log=function(){
+  var k=S.arg||'correction-entry',D=FDEF[k],f=FM(k),L=LF(k);if(!D)return '<p class="empty">Form not found.</p>';
+  if(!L.cols)L.cols=COMMON.slice(1).concat(D.cols.map(function(c){return D.fields.filter(function(x){return x.k===c})[0].l}),['Logged at']);
+  var rows=filtered(k),tot=rows.length,pages=Math.max(1,Math.ceil(tot/L.size));if(L.page>pages)L.page=pages;
+  var view=rows.slice((L.page-1)*L.size,L.page*L.size),vs=(S.views[k]||[]);
+  var sub={ 'correction-entry':'Entries submitted through the Correction Entry form, newest first.','quality-ticket':'Real tickets, raised by Quality.','root-cause':"Every Root Cause is attached to an Issue. Start one from an Issue's page.",'frequency-check':'Every part pulled for a frequency check, what Quality said, and where a part failed, how many corrections it took before one passed. Pulling a part never stops a machine; only an NG does.'}[k]||'Entries submitted through the '+f.n+' form, newest first.';
+  var ths=['Ticket','Machine','Age','Status','Actions'].concat(L.cols);
+  var body=view.map(function(e){
+    var act=e.deleted?'':(e.status==='open'?'<button class="btn sm" data-act="start" data-id="'+e.id+'">Start</button> ':'')+(e.status!=='closed'?'<button class="btn sm p" data-act="close" data-id="'+e.id+'">'+(D.btn||'Close ticket')+'</button> ':'')+'<button class="btn sm" data-act="del" data-id="'+e.id+'" title="Delete">🗑</button>';
+    return '<tr class="click" data-act="detail" data-id="'+e.id+'"><td><b>'+e.tno+'</b></td><td>'+e.machine+'</td><td>'+(overdue(e)?'<span class="chip c-over">'+ageOf(e)+'</span>':ageOf(e))+'</td><td>'+chipFor(e.status)+(e.stops&&e.status!=='closed'?'<span class="chip c-crit">stops machine</span>':'')+'</td><td style="white-space:nowrap">'+act+'</td>'+L.cols.map(function(c){var v=colVal(e,k,c);return '<td>'+esc(v)+'</td>'}).join('')+'</tr>'}).join('');
+  var health=''
+  return page(f.n+' Log',sub,'<button class="btn p" data-act="newform" data-k="'+k+'">+ '+(k==='quality-ticket'?'New ticket':'New')+'</button>')
+  +'<div class="card"><div class="filters">'
+  +lbl('Machine','<select data-chg="lf" data-k="'+k+'" data-p="m">'+machOpts(L.m)+'</select>')
+  +lbl('Status','<select data-chg="lf" data-k="'+k+'" data-p="st">'+opts([['open','Open'],['in progress','In progress'],['closed','Closed'],['overdue','Overdue']],L.st,'All statuses')+'</select>')
+  +lbl('Search','<input type="text" data-inp="lfq" data-k="'+k+'" value="'+esc(L.q)+'" placeholder="Search entries">')
+  +'<label style="grid-auto-flow:column;align-items:center;gap:6px;color:var(--ink)"><input type="checkbox" data-chg="lf" data-k="'+k+'" data-p="del"'+(L.del?' checked':'')+'> Show deleted</label>'
+  +'<button class="btn" data-act="lfclear" data-k="'+k+'">Clear</button>'
+  +lbl('Saved views','<select data-chg="lfview" data-k="'+k+'">'+opts(vs.map(function(v,i){return [i,v.name]}),'','Default')+'</select>')
+  +'<button class="btn" data-act="lfsave" data-k="'+k+'">Save view</button>'
+  +'<button class="btn" data-act="lfcols" data-k="'+k+'">Columns</button>'
+  +'<button class="btn" data-act="lfxls" data-k="'+k+'">Download as Excel</button></div></div>'
+  +'<div class="card"><div class="tw tall nw"><table><thead><tr>'+ths.map(function(h){return '<th>'+h+'</th>'}).join('')+'</tr></thead><tbody>'+(body||'<tr><td colspan="'+ths.length+'" class="empty">No entries match these filters.</td></tr>')+'</tbody></table></div>'
+  +'<div class="filters" style="margin-top:10px;justify-content:space-between"><span class="hint">Showing '+(tot?(L.page-1)*L.size+1:0)+'–'+Math.min(tot,L.page*L.size)+' of '+tot+'</span><span class="filters"><button class="btn sm" data-act="lfpage" data-k="'+k+'" data-d="-1">‹ Prev</button><span>Page '+L.page+' of '+pages+'</span><button class="btn sm" data-act="lfpage" data-k="'+k+'" data-d="1">Next ›</button>'
+  +lbl('Rows a page','<select data-chg="lf" data-k="'+k+'" data-p="size">'+opts([10,25,50],L.size)+'</select>')+'</span></div></div>'}
+CHG.lf=function(t){var L=LF(t.dataset.k),p=t.dataset.p;L[p]=t.type==='checkbox'?t.checked:(p==='size'?+t.value:t.value);L.page=1;draw()};
+CHG.lfq=function(t){var L=LF(t.dataset.k);L.q=t.value;L.page=1;var pos=t.selectionStart;S.afterDraw=function(){var i=document.querySelector('[data-inp=lfq]');if(i){i.focus();i.setSelectionRange(pos,pos)}};draw()};
+CHG.lfview=function(t){var v=(S.views[t.dataset.k]||[])[+t.value];var L=LF(t.dataset.k);if(v){L.m=v.m;L.st=v.st;L.del=v.del;L.q=v.q;L.cols=v.cols.slice();L.page=1}else{L.m=L.st=L.q='';L.del=false;L.cols=null}S.notice=v?'Opened the saved view "'+v.name+'".':'Back to the default view.';draw()};
+ACT.lfclear=function(el){var L=LF(el.dataset.k);L.m=L.st=L.q='';L.del=false;L.page=1;draw()};
+ACT.lfpage=function(el){var L=LF(el.dataset.k);L.page=Math.max(1,L.page+ +el.dataset.d);draw()};
+ACT.lfsave=function(el){var k=el.dataset.k;modal(mhead('Save this view','Saves the current filters and columns.')+'<form class="form" data-sub="lfsave" data-k="'+k+'"><label>View name<input type="text" name="name" required placeholder="Example: Overdue on Cell 1"></label><div><button class="btn p" type="submit">Save view</button></div></form>')};
+SUB.lfsave=function(f){var k=f.dataset.k,L=LF(k),n=new FormData(f).get('name');(S.views[k]=S.views[k]||[]).push({name:n,m:L.m,st:L.st,del:L.del,q:L.q,cols:(L.cols||[]).slice()});closeModal();S.notice='View "'+n+'" saved. Pick it from the Saved views list.';draw()};
+ACT.lfcols=function(el){var k=el.dataset.k,L=LF(k);modal(mhead('Columns','Choose what the table shows.')+'<form class="form" data-sub="lfcols" data-k="'+k+'" style="grid-template-columns:1fr 1fr">'+colList(k).map(function(c){return '<label style="grid-auto-flow:column;justify-content:start;gap:8px;font-weight:500"><input type="checkbox" name="c" value="'+esc(c)+'"'+(L.cols.indexOf(c)>-1?' checked':'')+'>'+esc(c)+'</label>'}).join('')+'<div style="grid-column:1/-1"><button class="btn p" type="submit">Show these</button></div></form>')};
+SUB.lfcols=function(f){var k=f.dataset.k;LF(k).cols=colList(k).filter(function(c){return new FormData(f).getAll('c').indexOf(c)>-1});closeModal();draw()};
+ACT.lfxls=function(el){var k=el.dataset.k,rows=filtered(k),cl=colList(k);dlCsv(FM(k).n.replace(/[^A-Za-z]+/g,'_')+'_log.csv',[['Ticket','Machine','Status'].concat(cl)].concat(rows.map(function(e){return [e.tno,e.machine,e.status].concat(cl.map(function(c){return colVal(e,k,c)}))})));S.notice='Downloaded '+rows.length+' rows.';draw()};
+function entryById(id){return S.entries.filter(function(e){return e.id===+id})[0]}
+ACT.start=function(el){var e=entryById(el.dataset.id);e.status='in progress';e.log.push({t:'Started by Demo manager',d:TODAY});logAct('Ticket started','Cell '+e.cell,e.machine,e.tno,e.fn);S.notice=e.tno+' started.';draw()};
+ACT.close=function(el){var e=entryById(el.dataset.id);
+  if(FDEF[e.form].qual){modal(mhead('Close '+e.tno+' with a correction','This closes the quality ticket and opens a linked Correction Entry for the fix.')+'<form class="form" data-sub="qclose" data-id="'+e.id+'"><label>Action taken<input type="text" name="act" required value="Tool wear offset +0.003"></label><div><button class="btn p" type="submit">Close and create correction</button></div></form>');return}
+  if(FDEF[e.form].appr){e.f.approved='Demo manager'}
+  var msg=closeEntry(e,'Demo manager',FDEF[e.form].appr?'Approved and closed':'Closed');S.notice=e.tno+' closed'+(msg.length?': '+msg.join('; ')+'.':'.');closeModal();draw()};
+SUB.qclose=function(f){var e=entryById(f.dataset.id),act=new FormData(f).get('act');
+  var c=newEntry('correction-entry',e.machine,{part:e.f.part,issue:e.f.fail,feature:e.f.feature,ctype:'Tool wear offset',action:act,before:0.031,after:0.002,by:'Demo manager',approved:''},false);
+  c.log.unshift({t:'Created from quality ticket '+e.tno,d:TODAY});var msg=closeEntry(e,'Demo manager','Closed with a correction');closeModal();S.notice=e.tno+' closed. Correction '+c.tno+' opened'+(msg.length?'; '+msg.join('; '):'')+'.';draw()};
+ACT.del=function(el){var e=entryById(el.dataset.id);modal(mhead('Delete '+e.tno,'It moves to Deleted items and can be restored. Deleted entries are never counted.')+'<form class="form" data-sub="del" data-id="'+e.id+'"><label>Reason<input type="text" name="why" required placeholder="Why is it being deleted?"></label><div><button class="btn p" type="submit">Delete entry</button></div></form>')};
+SUB.del=function(f){var e=entryById(f.dataset.id);e.deleted=true;e.delBy='Demo manager';e.delAt=TODAY;e.delWhy=new FormData(f).get('why');if(e.stops&&e.status!=='closed'){e.status='closed'}sync();logAct('Entry deleted','Cell '+e.cell,e.machine,e.tno,e.delWhy);closeModal();S.notice=e.tno+' moved to Deleted items.';draw()};
+ACT.detail=function(el){var e=entryById(el.dataset.id),D=FDEF[e.form];
+  modal(mhead(e.tno+' · '+e.fn,e.machine+' · Cell '+e.cell+' · '+e.date+' '+e.time)+'<p>'+chipFor(e.status)+(e.stops?'<span class="chip c-crit">stops machine</span>':'')+(e.deleted?'<span class="chip c-idle">deleted</span>':'')+'</p>'
+   +'<div class="tw" style="max-height:300px"><table><tbody>'+D.fields.map(function(x){return '<tr><td class="hint" style="width:45%">'+x.l+'</td><td>'+esc(e.f[x.k]==null?'':e.f[x.k])+'</td></tr>'}).join('')+'</tbody></table></div><h3 style="margin-top:12px">History</h3><div class="tl">'+e.log.map(function(l){return '<div><b>'+esc(l.t)+'</b><div class="hint">'+l.d+'</div></div>'}).join('')+'</div>'
+   +'<div style="margin-top:14px;display:flex;gap:8px;flex-wrap:wrap">'+(e.deleted?'':(e.status==='open'?'<button class="btn" data-act="start" data-id="'+e.id+'">Start</button>':'')+(e.status!=='closed'?'<button class="btn p" data-act="close" data-id="'+e.id+'">'+(D.btn||'Close ticket')+'</button>':''))+'<a class="btn" data-go="machine" data-arg="'+e.machine+'" style="text-decoration:none">Open machine</a></div>',false)};
+ACT.newform=function(el){var k=el.dataset.k||el.dataset.kk,D=FDEF[k],f=FM(k),m0=S.cell?S.machines.filter(function(m){return m.cell===S.cell})[0].code:S.machines[0].code;
+  modal(mhead('New '+f.n,'Fill in what you found.')+'<form class="form" data-sub="newform" data-k="'+k+'"><div class="row"><label>Machine<select name="machine" data-chg="nfm" data-k="'+k+'">'+machOpts(m0,false)+'</select></label></div>'
+   +visF(k).map(function(x){var d=x.def?x.def(m0):'',inp,rq=reqF(k,x);
+     if(x.t==='sel')inp='<select name="'+x.k+'">'+opts(Array.from(new Set(x.o)))+'</select>';else if(x.t==='person')inp='<select name="'+x.k+'">'+opts(PEOPLE)+'</select>';else if(x.t==='area')inp='<textarea name="'+x.k+'" rows="2"></textarea>';else if(x.t==='num')inp='<input type="number" step="any" name="'+x.k+'">';else if(x.t==='date')inp='<input type="date" name="'+x.k+'" value="'+addDays(TODAY,90)+'">';else inp='<input type="text" name="'+x.k+'"'+(x.def?' data-def="'+x.k+'" value="'+esc(d)+'"':'')+'>';
+     if(rq)inp=inp.replace(/^<(select|input|textarea)/,'<$1 required');return '<label>'+x.l+(rq?' *':'')+inp+'</label>'}).join('')
+   +(D.stops?'<label style="grid-auto-flow:column;justify-content:start;align-items:center;gap:8px;font-weight:500"><input type="checkbox" name="stops" checked> This stops the machine until the ticket is closed</label>':'')
+   +'<div><button class="btn p" type="submit">Save</button></div></form>',true)};
+CHG.nfm=function(t){var k=t.dataset.k,D=FDEF[k];D.fields.forEach(function(x){if(x.def){var i=document.querySelector('[data-def='+x.k+']');if(i)i.value=x.def(t.value)}})};
+SUB.newform=function(f){var k=f.dataset.k,fd=new FormData(f),vals={};FDEF[k].fields.forEach(function(x){var v=fd.get(x.k);vals[x.k]=x.t==='num'&&v!==''&&v!=null?+v:(v==null?'':v)});
+  var e=newEntry(k,fd.get('machine'),vals,!!fd.get('stops'));closeModal();S.notice=e.tno+' saved'+(e.stops?'. '+e.machine+' now shows as stopped on the dashboard.':'.');if(S.view!=='log'||S.arg!==k)go('log',k);else draw()};
+/* ---------- deleted items ---------- */
+PAGES.deleted=function(){
+  var ty=S.dty||'',rows=S.entries.filter(function(e){return e.deleted&&(!ty||e.form===ty)});
+  return page('Deleted items','Log entries that were deleted. Restoring one brings the record back into its log; it does not change a machine\'s status or send anything again.')
+  +filt(lbl('Type','<select data-f="dty">'+opts(FORMS.map(function(x){return [x.k,x.n]}),ty,'All types')+'</select>'))
+  +'<div class="card">'+tbl(['Type','Date','Machine','What','Deleted','By','Reason',''],rows.map(function(e){return '<tr><td>'+e.fn+'</td><td>'+e.date+'</td><td>'+e.machine+'</td><td>'+e.tno+'</td><td>'+(e.delAt||'')+'</td><td>'+(e.delBy||'')+'</td><td>'+esc(e.delWhy||'')+'</td><td><button class="btn sm" data-act="restore" data-id="'+e.id+'">Restore</button></td></tr>'}))+'</div>'};
+ACT.restore=function(el){var e=entryById(el.dataset.id);e.deleted=false;logAct('Entry restored','Cell '+e.cell,e.machine,e.tno,'Restored from Deleted items');S.notice=e.tno+' restored to its log.';draw()};
+/* ---------- forms overview ---------- */
+PAGES.forms=function(){
+  var from=S.ffrom||addDays(TODAY,-29),to=S.fto||TODAY;
+  var all=LE().filter(function(e){return e.date>=from&&e.date<=to&&(!S.cell||e.cell===S.cell)});
+  var over=all.filter(overdue).length,pc=all.length?Math.round(over/all.length*100):0;
+  var cards=FORMS.map(function(f){var a=all.filter(function(e){return e.form===f.k}),c=function(s){return a.filter(function(e){return e.status===s}).length};
+    return '<div class="card" style="margin:0"><h3>'+f.n+'</h3><div class="num" style="margin:6px 0">'+a.length+' <small>entered</small></div><div><span class="chip c-open">'+c('open')+' open</span><span class="chip c-prog">'+c('in progress')+' in progress</span><span class="chip c-done">'+c('closed')+' closed</span><span class="chip c-over">'+a.filter(overdue).length+' overdue</span></div><div style="margin-top:10px;display:flex;gap:8px"><button class="btn sm" data-go="log" data-arg="'+f.k+'">Log</button><button class="btn sm p" data-act="newform" data-k="'+f.k+'">+ New</button></div></div>'}).join('');
+  return page('Forms','One card per form. Entered = entries dated in the range; open, in progress, closed and overdue are counted exactly as on each log.')
+  +filt(lbl('From','<input type="date" data-chg="ff" data-p="ffrom" value="'+from+'">')+lbl('To','<input type="date" data-chg="ff" data-p="fto" value="'+to+'">')+lbl('Cell','<select data-f="cell">'+cellOpts(S.cell)+'</select>'))
+  +'<div class="card"><h3>Logs health</h3><p class="sub" style="margin:4px 0 0">Overdue entries should stay under '+TH.logsHealth+'% of all entries. Right now: <b>'+pc+'%</b> ('+over+' of '+all.length+') <span class="chip '+(pc>TH.logsHealth?'c-crit':'c-ok')+'">'+(pc>TH.logsHealth?'Over the limit':'Healthy')+'</span></p></div>'
+  +'<div class="scells" style="grid-template-columns:repeat(auto-fit,minmax(260px,1fr))">'+cards+'</div>'};
+CHG.ff=function(t){S[t.dataset.p]=t.value;draw()};
+/* ---------- quality queue ---------- */
+function genExtra(){
+  S.views={};S.activity=[];S.qid=100;S.lf={};
+  S.queue={freq:[],recov:[]};var busy={};S.entries.forEach(function(e){if(e.stops&&e.status!=='closed'&&!e.deleted)busy[e.machine]=1});var free=S.machines.filter(function(m){return !busy[m.code]});
+  for(var i=0;i<5;i++){var m=pick(free);S.queue.freq.push({id:++S.qid,since:ri(15,190),cell:m.cell,machine:m.code,part:pick(['First part','Frequency check']),by:pick(PEOPLE)})}
+  for(i=0;i<3;i++){m=pick(free);S.queue.recov.push({id:++S.qid,since:ri(10,120),cell:m.cell,machine:m.code,part:'Recovery part N'+ri(1,3),from:pick(['Tool Change','Pivot Calibration','Probe Calibration']),by:pick(PEOPLE)})}
+  var evs=['Ticket opened','Ticket closed','Tool assigned','Pivot calibrated','Entry deleted','Shift swap','Library edit'];
+  for(i=0;i<40;i++){var mm=pick(S.machines);S.activity.push({t:addDays(TODAY,-ri(0,6))+' '+hm(ri(0,NOW_MIN)),ev:pick(evs),cell:'Cell '+mm.cell,m:mm.code,code:pick(['TL-101','PV-2B','FX-3A','CE-1004']),desc:pick(['Created','Updated','Closed with note','Assigned to machine']),user:pick(PEOPLE)})}
+  S.activity.sort(function(a,b){return a.t<b.t?1:-1})}
+PAGES.queue=function(){
+  var q=S.queue,vf=function(a){return S.cell?a.filter(function(x){return x.cell===S.cell}):a};
+  var row=function(x,kind){return '<tr><td><b>'+fmtMin(x.since)+'</b></td><td>Cell '+x.cell+'</td><td>'+x.machine+'</td><td>'+x.part+'</td><td>'+(kind==='f'?x.by:x.from)+'</td><td><button class="btn sm p" data-act="qreport" data-id="'+x.id+'" data-kind="'+kind+'">Report</button></td></tr>'};
+  return page('Quality Queue','Everything waiting for a Quality report, longest wait first, in two separate lists because they mean different things: a frequency part comes from a machine that is still running, while a recovery report comes from a machine that was just handed back after a stop.')
+  +filt(lbl('Cell','<select data-f="cell">'+cellOpts(S.cell)+'</select>'))
+  +'<div class="card"><h2>Frequency parts <span class="chip c-prog">'+vf(q.freq).length+'</span></h2>'+tbl(['Waiting','Cell','Machine','Part','Pulled by','Report'],vf(q.freq).sort(function(a,b){return b.since-a.since}).map(function(x){return row(x,'f')}))+'</div>'
+  +'<div class="card"><h2>Recovery reports <span class="chip c-prog">'+vf(q.recov).length+'</span></h2>'+tbl(['Waiting','Cell','Machine','To report on','From','Report'],vf(q.recov).sort(function(a,b){return b.since-a.since}).map(function(x){return row(x,'r')}))+'</div>'};
+ACT.qreport=function(el){var kind=el.dataset.kind,x=(kind==='f'?S.queue.freq:S.queue.recov).filter(function(y){return y.id===+el.dataset.id})[0];
+  modal(mhead('Report on '+x.part,x.machine+' · waited '+fmtMin(x.since))+'<form class="form" data-sub="qrep" data-id="'+x.id+'" data-kind="'+kind+'"><label>Outcome<select name="out"><option>Pass</option><option>NG</option></select></label><label>Notes<input type="text" name="n" placeholder="Optional"></label><div class="hint">An NG stops the machine and opens a Quality Ticket. A pass just clears the part from the queue.</div><div><button class="btn p" type="submit">Submit report</button></div></form>')};
+SUB.qrep=function(f){var kind=f.dataset.kind,id=+f.dataset.id,list=kind==='f'?S.queue.freq:S.queue.recov,x=list.filter(function(y){return y.id===id})[0],fd=new FormData(f);
+  list.splice(list.indexOf(x),1);var out=fd.get('out'),msg=x.part+' reported: '+out+'.';
+  var fc=newEntry('frequency-check',x.machine,{check:x.part,since:ri(30,110),out:out,corr:out==='NG'?1:0,by:x.by,rep:'Demo manager'},false);fc.status='closed';fc.closed=TODAY;fc.closedBy='Demo manager';
+  if(out==='NG'){var q=newEntry('quality-ticket',x.machine,{part:'DEMO-PART-A',fail:'Failed at '+x.part.toLowerCase(),parts:1,feature:pick(FEATS),sev:'Danger',desc:fd.get('n')||'NG at frequency check',by:'Demo manager'},true);q.mins=5;msg+=' '+x.machine+' stopped, Quality Ticket '+q.tno+' opened.'}
+  closeModal();S.notice=msg;draw()};
+
+
+/* ================= production, planning, reports ================= */
+var SHIFTS={A:'00:00–08:00',B:'08:00–16:00',C:'16:00–24:00'};
+function cycOf(m){return STAGES[m.stageIdx].cyc}
+function shiftPlan(m){return Math.floor(480*.85/cycOf(m))}
+function genProdLog(){
+  S.plog=[];S.pe={};
+  var days=[];for(var i=7;i>=0;i--)days.push(addDays(TODAY,-i));
+  days.forEach(function(d){['A','B','C'].forEach(function(sh){
+    if(d===TODAY&&sh!=='A')return;
+    S.machines.forEach(function(m){var pl=shiftPlan(m),h=hh(d+sh+m.code),sc=h%4===0?h%3:0,rw=h%7===0?1+h%4:0,g=Math.max(0,pl-(h%9)-sc-rw-(h%11===0?15:0));
+      S.plog.push({d:d,sh:sh,m:m.code,cell:m.cell,stage:m.stage,planned:pl,good:g,rework:rw,scrap:sc,by:PEOPLE[h%PEOPLE.length]})})})});
+  S.curShift='B'}
+function peRow(m){var p=S.pe[m.code];if(!p){var h=hh('pe'+m.code);p=S.pe[m.code]={good:'',rework:0,scrap:0,done:false,planned:shiftPlan(m),by:PEOPLE[h%PEOPLE.length]}}return p}
+PAGES.pentry=function(){
+  var cell=S.cell||S.pecell||'1',ms=S.machines.filter(function(m){return m.cell===cell});
+  var rows=ms.map(function(m){var p=peRow(m),stopped=m.state==='stop';
+    return '<tr><td><b>'+m.code+'</b>'+(stopped?' <span class="chip c-crit">stopped</span>':'')+'</td><td>'+m.stage+'</td><td>'+p.planned+'</td>'
+     +(p.done?'<td>'+p.good+'</td><td>'+p.rework+'</td><td>'+p.scrap+'</td><td><span class="chip c-done">Submitted</span></td>'
+      :'<td><input type="number" min="0" style="width:90px" data-inp="pe" data-m="'+m.code+'" data-p="good" value="'+p.good+'" placeholder="'+p.planned+'"></td><td><input type="number" min="0" style="width:70px" data-inp="pe" data-m="'+m.code+'" data-p="rework" value="'+p.rework+'"></td><td><input type="number" min="0" style="width:70px" data-inp="pe" data-m="'+m.code+'" data-p="scrap" value="'+p.scrap+'"></td><td><span class="chip c-open">To enter</span></td>')+'</tr>'});
+  var left=ms.filter(function(m){return !peRow(m).done}).length;
+  return page('Production Entry','Enter what each machine produced this shift. Submitting locks the row and adds the parts to every tool, probe and fixture on that machine, so the wear bars and alerts move straight away.','<button class="btn p" data-act="pesub" data-cell="'+cell+'"'+(left?'':' disabled')+'>Submit '+left+' rows</button>')
+  +filt(lbl('Cell','<select data-chg="pecell">'+cellOpts(cell,false)+'</select>')+lbl('Shift','<select disabled><option>Shift B · '+SHIFTS.B+'</option></select>')+lbl('Date','<input type="text" value="'+TODAY+'" disabled>')+'<button class="btn" data-act="pefill" data-cell="'+cell+'">Fill with planned</button>')
+  +'<div class="card">'+tbl(['Machine','Stage','Planned','Good','Rework','Scrap','Status'],rows)+'</div>'};
+CHG.pecell=function(t){S.pecell=t.value;S.cell='';document.getElementById('cellSel').value='';draw()};
+CHG.pe=function(t){var p=S.pe[t.dataset.m];p[t.dataset.p]=t.value===''?'':+t.value};
+ACT.pefill=function(el){S.machines.filter(function(m){return m.cell===el.dataset.cell}).forEach(function(m){var p=peRow(m);if(!p.done)p.good=m.state==='stop'?Math.round(p.planned*.4):p.planned-(hh(m.code)%6)});draw()};
+ACT.pesub=function(el){
+  var before=alerts().length,n=0,tot=0;
+  S.machines.filter(function(m){return m.cell===el.dataset.cell}).forEach(function(m){var p=peRow(m);if(p.done)return;if(p.good==='')p.good=0;
+    var parts=(+p.good)+(+p.rework)+(+p.scrap);p.done=true;n++;tot+=parts;
+    S.items.forEach(function(i){if(i.m===m.code&&i.kind!=='Pivot'){i.used+=parts;i.upd=TODAY}});
+    S.plog.unshift({d:TODAY,sh:'B',m:m.code,cell:m.cell,stage:m.stage,planned:p.planned,good:+p.good,rework:+p.rework,scrap:+p.scrap,by:'Demo manager'})});
+  var after=alerts().length;logAct('Production submitted','Cell '+el.dataset.cell,'','PE',n+' rows, '+tot+' parts');
+  S.notice=n+' rows submitted ('+tot+' parts added to tool, probe and fixture usage). Alerts went from '+before+' to '+after+'.';draw()};
+/* production log */
+PAGES.plog=function(){
+  var f=S.plf=S.plf||{d:'',sh:'',m:'',page:1},rows=S.plog.filter(function(r){return (!f.d||r.d===f.d)&&(!f.sh||r.sh===f.sh)&&(!f.m||r.m===f.m)&&(!S.cell||r.cell===S.cell)});
+  var pages=Math.max(1,Math.ceil(rows.length/15));if(f.page>pages)f.page=pages;var v=rows.slice((f.page-1)*15,f.page*15);
+  var t=rows.reduce(function(a,r){a.p+=r.planned;a.g+=r.good;a.r+=r.rework;a.s+=r.scrap;return a},{p:0,g:0,r:0,s:0});
+  var days=[];for(var i=0;i<8;i++)days.push(addDays(TODAY,-i));
+  return page('Production Log','Every submitted production entry, one row per machine per shift.','<button class="btn" data-act="plxls">Download as Excel</button>')
+  +filt(lbl('Date','<select data-chg="plf" data-p="d">'+opts(days,f.d,'All dates')+'</select>')+lbl('Shift','<select data-chg="plf" data-p="sh">'+opts(['A','B','C'],f.sh,'All shifts')+'</select>')+lbl('Machine','<select data-chg="plf" data-p="m">'+machOpts(f.m)+'</select>'))
+  +'<div class="tiles">'+tile('g','▦',t.p,'Planned','plog')+tile('g','✓',t.g,'Good ('+(t.p?Math.round(t.g/t.p*100):0)+'%)','plog')+tile('w','↻',t.r,'Rework','plog')+tile('r','✕',t.s,'Scrap','plog')+'</div>'
+  +'<div class="card">'+tbl(['Date','Shift','Machine','Stage','Planned','Good','Rework','Scrap','Entered by'],v.map(function(r){return '<tr><td>'+r.d+'</td><td>'+r.sh+'</td><td><b>'+r.m+'</b></td><td>'+r.stage+'</td><td>'+r.planned+'</td><td>'+r.good+'</td><td>'+r.rework+'</td><td>'+r.scrap+'</td><td>'+r.by+'</td></tr>'}))
+  +'<div class="filters" style="margin-top:10px;justify-content:space-between"><span class="hint">'+rows.length+' rows</span><span class="filters"><button class="btn sm" data-act="plpage" data-d="-1">‹ Prev</button><span>Page '+f.page+' of '+pages+'</span><button class="btn sm" data-act="plpage" data-d="1">Next ›</button></span></div></div>'};
+CHG.plf=function(t){S.plf[t.dataset.p]=t.value;S.plf.page=1;draw()};
+ACT.plpage=function(el){S.plf.page=Math.max(1,S.plf.page+ +el.dataset.d);draw()};
+ACT.plxls=function(){var f=S.plf||{},rows=S.plog.filter(function(r){return (!f.d||r.d===f.d)&&(!f.sh||r.sh===f.sh)&&(!f.m||r.m===f.m)});dlCsv('Production_log.csv',[['Date','Shift','Machine','Stage','Planned','Good','Rework','Scrap','Entered by']].concat(rows.map(function(r){return [r.d,r.sh,r.m,r.stage,r.planned,r.good,r.rework,r.scrap,r.by]})));S.notice='Downloaded '+rows.length+' rows.';draw()};
+/* planning board */
+var SETUP_MIN=20,REC_PARTS=3;
+function planRows(){
+  return S.machines.filter(function(m){return !S.cell||m.cell===S.cell}).map(function(m){
+    var cy=cycOf(m),exp=shiftPlan(m),due=S.items.filter(function(i){return i.m===m.code&&stat(i)!=='OK'}),ded=due.length*(SETUP_MIN+REC_PARTS*cy),dedParts=Math.ceil(ded/cy),
+      ng=LE().filter(function(e){return e.machine===m.code&&e.form==='quality-ticket'&&e.date===TODAY}).reduce(function(a,e){return a+(+e.f.parts||0)},0),
+      stopLoss=m.state==='stop'?Math.round(exp*.6):0,ach=Math.max(0,exp-dedParts-ng-stopLoss);
+    return{m:m,cy:cy,exp:exp,due:due.length,ded:dedParts,ng:ng,stop:stopLoss,ach:ach}})}
+PAGES.plan=function(){
+  var rows=planRows(),T=rows.reduce(function(a,r){a.e+=r.exp;a.a+=r.ach;a.d+=r.ded;a.n+=r.ng;a.s+=r.stop;return a},{e:0,a:0,d:0,n:0,s:0});
+  return page('Planning Board','What each machine can really make this shift. Expected comes from the stage cycle time; every tool, probe, fixture or pivot that is due costs one setup ('+SETUP_MIN+' min) and '+REC_PARTS+' recovery parts, and parts lost to NG and stopped time come off too.')
+  +filt(lbl('Cell','<select data-f="cell">'+cellOpts(S.cell)+'</select>'))
+  +'<div class="tiles">'+tile('g','▦',T.e,'Expected parts','plan')+tile('g','✓',T.a,'Achievable ('+Math.round(T.a/T.e*100)+'%)','plan')+tile('w','⚙',T.d,'Lost to recovery','plan','setup + recovery parts')+tile('r','✕',T.n+T.s,'Lost to NG and stops','plan')+'</div>'
+  +'<div class="card">'+tbl(['Machine','Stage','Cycle (min)','Expected','Items due','Recovery deduction','Lost to NG','Stopped','Achievable',''],rows.map(function(r){var p=r.exp?r.ach/r.exp*100:0;
+     return '<tr class="click" data-m="'+r.m.code+'"><td><b>'+r.m.code+'</b></td><td>'+r.m.stage+'</td><td>'+r.cy+'</td><td>'+r.exp+'</td><td>'+(r.due?'<span class="chip c-warn">'+r.due+'</span>':'0')+'</td><td>'+(r.ded?'−'+r.ded:'0')+'</td><td>'+(r.ng?'−'+r.ng:'0')+'</td><td>'+(r.stop?'−'+r.stop:'0')+'</td><td><b>'+r.ach+'</b></td><td style="min-width:110px"><div class="bar"><i class="'+(p<60?'c':p<85?'w':'')+'" style="width:'+p+'%"></i></div></td></tr>'}),'tall')+'</div>'};
+/* plan vs actual */
+function scaleC(){return S.cell?1/3:1}
+PAGES.pva=function(){
+  var n=S.pvaR||14,d=S.prod.slice(-n),k=scaleC(),W=900,H=260,L=48,B=26,T=14,max=0;
+  d.forEach(function(x){max=Math.max(max,x.planned*k)});max=Math.ceil(max/500)*500||500;
+  var bw=(W-L-8)/d.length,y=function(v){return T+(H-T-B)*(1-v/max)},out='';
+  for(var g=0;g<=4;g++){var v=max/4*g;out+='<line x1="'+L+'" x2="'+W+'" y1="'+y(v)+'" y2="'+y(v)+'" stroke="var(--grid)"/><text x="'+(L-6)+'" y="'+(y(v)+3)+'" text-anchor="end">'+Math.round(v)+'</text>'}
+  d.forEach(function(x,i){var X=L+i*bw+bw*.1,w=bw*.38,p=x.planned*k,a=x.good*k;
+    out+='<g><title>'+x.d+' · planned '+Math.round(p)+' · actual '+Math.round(a)+'</title><rect x="'+X+'" y="'+y(p)+'" width="'+w+'" height="'+(H-B-y(p))+'" fill="var(--grid)" stroke="var(--line)" rx="1.5"/><rect x="'+(X+w+2)+'" y="'+y(a)+'" width="'+w+'" height="'+(H-B-y(a))+'" fill="'+(a/p<.9?'var(--warn)':'var(--accent)')+'" rx="1.5"/></g><text x="'+(X+w)+'" y="'+(H-8)+'" text-anchor="middle">'+dd(x.d)+'</text>'});
+  var tp=0,ta=0;d.forEach(function(x){tp+=x.planned*k;ta+=x.good*k});
+  return page('Plan vs Actual','Planned parts against good parts, per day. Orange bars mean the day finished more than 10% under plan.')
+  +filt(lbl('Cell','<select data-f="cell">'+cellOpts(S.cell)+'</select>')+lbl('Days','<select data-chg="pvar">'+opts([7,14,30,60],n)+'</select>'))
+  +'<div class="tiles">'+tile('g','▦',Math.round(tp),'Planned','pva')+tile('g','✓',Math.round(ta),'Actual (good)','pva')+tile(ta/tp<.9?'w':'g','%',Math.round(ta/tp*100)+'%','Plan attainment','pva')+tile('r','−',Math.round(tp-ta),'Shortfall','pva')+'</div>'
+  +'<div class="card"><svg viewBox="0 0 '+W+' '+H+'" width="100%" role="img" aria-label="Plan vs actual">'+out+'</svg><div class="legend"><span><i style="background:var(--grid);border:1px solid var(--line)"></i>Planned</span><span><i style="background:var(--accent)"></i>Actual</span><span><i style="background:var(--warn)"></i>Under plan</span></div></div>'
+  +'<div class="card">'+tbl(['Day','Planned','Actual','Gap','Attainment'],d.slice().reverse().map(function(x){var p=Math.round(x.planned*k),a=Math.round(x.good*k);return '<tr><td>'+x.d+'</td><td>'+p+'</td><td>'+a+'</td><td>'+(a-p)+'</td><td><span class="chip '+(a/p<.9?'c-warn':'c-ok')+'">'+Math.round(a/p*100)+'%</span></td></tr>'}),'tall')+'</div>'};
+CHG.pvar=function(t){S.pvaR=+t.value;draw()};
+/* patterns */
+PAGES.patterns=function(){
+  var en=[];S.machines.forEach(function(m){if(S.cell&&m.cell!==S.cell)return;m.hist.forEach(function(h){var mn=+h.from.slice(11,13)*60+ +h.from.slice(14,16);en.push({date:h.from.slice(0,10),shift:mn<480?'A':mn<960?'B':'C',wait:h.reason,machine:m.code})})});
+  LE().filter(function(e){return e.stops&&(!S.cell||e.cell===S.cell)}).forEach(function(e){en.push({date:e.date,shift:e.shift,wait:e.wait,machine:e.machine})});
+  var days=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'],grid={},mx=0;
+  en.forEach(function(e){var wd=(new Date(e.date+'T00:00:00Z').getUTCDay()+6)%7,key=wd+e.shift;grid[key]=(grid[key]||0)+1;mx=Math.max(mx,grid[key])});
+  var heat='<div class="tw"><table><thead><tr><th></th>'+days.map(function(x){return '<th>'+x+'</th>'}).join('')+'</tr></thead><tbody>'+['A','B','C'].map(function(sh){return '<tr><td><b>Shift '+sh+'</b><div class="hint">'+SHIFTS[sh]+'</div></td>'+days.map(function(x,i){var c=grid[i+sh]||0,a=mx?c/mx:0;return '<td style="text-align:center;background:rgba(224,82,99,'+(a*.55).toFixed(2)+')" title="'+c+' stops">'+c+'</td>'}).join('')+'</tr>'}).join('')+'</tbody></table></div>';
+  var by={},bm={};en.forEach(function(e){by[e.wait]=(by[e.wait]||0)+1;bm[e.machine]=(bm[e.machine]||0)+1});
+  var rk=function(o){return Object.keys(o).sort(function(a,b){return o[b]-o[a]})},rs=rk(by),ms=rk(bm).slice(0,8),mxr=by[rs[0]]||1,mxm=bm[ms[0]]||1;
+  var rep=rk(bm).filter(function(c){return bm[c]>=3});
+  return page('Patterns','Where the stops cluster. Built from every ticket that stopped a machine in the last 30 days, so it changes as tickets are raised and closed.')
+  +filt(lbl('Cell','<select data-f="cell">'+cellOpts(S.cell)+'</select>'))
+  +'<div class="card"><h2>When machines stop</h2><p class="sub" style="margin:2px 0 8px">Stops by weekday and shift. Darker means more.</p>'+heat+'</div>'
+  +'<div class="two e"><div class="card"><h2>By reason</h2>'+rs.map(function(r){return '<div class="hb"><span>'+r+'</span><div class="bar"><i style="width:'+by[r]/mxr*100+'%"></i></div><span style="text-align:right">'+by[r]+'</span></div>'}).join('')+'</div>'
+  +'<div class="card"><h2>By machine (top 8)</h2>'+ms.map(function(m){return '<div class="hb"><span class="click" data-m="'+m+'"><b>'+m+'</b></span><div class="bar"><i class="w" style="width:'+bm[m]/mxm*100+'%"></i></div><span style="text-align:right">'+bm[m]+'</span></div>'}).join('')+'</div></div>'
+  +'<div class="card"><h2>Repeat offenders</h2><p class="sub" style="margin:2px 0 8px">Machines with three or more stops in the period.</p>'+(rep.length?rep.map(function(c){return '<span class="chip c-crit click" data-m="'+c+'">'+c+' · '+bm[c]+' stops</span>'}).join(''):'<p class="empty">None.</p>')+'</div>'};
+/* evening summary */
+function summaryText(){
+  var s=stats(),d=S.prod[S.prod.length-1],k=scaleC(),al=alerts(),crit=al.filter(function(a){return a.lvl==='Critical'}).length,closed=LE().filter(function(e){return e.closed===TODAY&&(!S.cell||e.cell===S.cell)}).length,opened=LE().filter(function(e){return e.date===TODAY&&(!S.cell||e.cell===S.cell)}).length;
+  return ['Evening summary · '+TODAY+(S.cell?' · Cell '+S.cell:' · all cells'),
+   '',
+   'Production: '+Math.round(d.good*k)+' good of '+Math.round(d.planned*k)+' planned ('+Math.round(d.good/d.planned*100)+'%). Rework '+Math.round(d.rework*k)+', scrap '+Math.round(d.scrap*k)+'.',
+   'Machines: '+(s.ms.length-s.stopped.length)+' running, '+s.stopped.length+' stopped'+(s.stopped.length?' ('+s.stopped.slice(0,4).map(function(m){return m.code+' – '+m.reason}).join('; ')+')':'')+'.',
+   'Tickets: '+opened+' opened today, '+closed+' closed, '+s.open.length+' still open, '+s.over.length+' overdue.',
+   'Alerts: '+al.length+' open, '+crit+' critical.',
+   'Quality: '+s.quality.length+' danger-level quality tickets open.',
+   '',
+   'For the next shift: '+(s.stopped.length?'recover '+s.stopped[0].code+' first. ':'')+(s.over.length?'Clear the '+s.over.length+' overdue tickets, oldest first.':'No overdue tickets.')].join('\n')}
+PAGES.evening=function(){
+  return page('Evening summary','A plain-text hand-over for the next shift, written from today\'s live numbers. Copy it into a chat or an email.','<button class="btn p" data-act="copysum">Copy summary</button>')
+  +filt(lbl('Cell','<select data-f="cell">'+cellOpts(S.cell)+'</select>'))
+  +'<div class="card"><pre style="white-space:pre-wrap;font:14px/1.6 inherit;margin:0">'+esc(summaryText())+'</pre></div>'};
+ACT.copysum=function(){var t=summaryText();try{navigator.clipboard.writeText(t).then(function(){S.notice='Summary copied.';draw()},function(){S.notice='Select the text and copy it.';draw()})}catch(x){S.notice='Select the text and copy it.';draw()}};
+/* report */
+PAGES.report=function(){
+  var r=S.rep=S.rep||{days:7,secs:{prod:1,down:1,tick:1,alert:1,qual:1}};
+  var names={prod:'Production and yield',down:'Downtime by reason',tick:'Ticket status by form',alert:'Open alerts',qual:'Quality tickets'};
+  return page('Generate report','Pick a period and the sections, then build a PowerPoint deck from today\'s numbers.','<button class="btn p" data-act="genpptx">Generate .pptx</button>')
+  +'<div class="card"><div class="filters">'+lbl('Period','<select data-chg="repd">'+opts([[7,'Last 7 days'],[14,'Last 14 days'],[30,'Last 30 days']],r.days)+'</select>')+lbl('Cell','<select data-f="cell">'+cellOpts(S.cell)+'</select>')+'</div>'
+  +'<h3 style="margin:14px 0 6px">Sections</h3>'+Object.keys(names).map(function(k){return '<label style="display:flex;gap:8px;align-items:center;margin:6px 0;font-weight:500"><input type="checkbox" data-chg="reps" data-k="'+k+'"'+(r.secs[k]?' checked':'')+'> '+names[k]+'</label>'}).join('')+'</div>'
+  +'<div class="card"><h2>Preview</h2><p class="sub" style="margin:2px 0 8px">One slide per ticked section.</p><div class="scells" style="grid-template-columns:repeat(auto-fit,minmax(200px,1fr))">'+Object.keys(names).filter(function(k){return r.secs[k]}).map(function(k,i){return '<div class="card" style="margin:0"><div class="hint">Slide '+(i+2)+'</div><b>'+names[k]+'</b></div>'}).join('')+'</div></div>'};
+CHG.repd=function(t){S.rep.days=+t.value};
+CHG.reps=function(t){S.rep.secs[t.dataset.k]=t.checked?1:0;draw()};
+ACT.genpptx=function(){
+  var go2=function(){
+    try{var P=new window.PptxGenJS(),r=S.rep,s=stats(),d=S.prod.slice(-r.days),t=sumProd(d),al=alerts();
+      var title=function(sl,txt){sl.addText(txt,{x:.5,y:.3,w:9,h:.6,fontSize:24,bold:true,color:'12a58c',fontFace:'Calibri'})};
+      var s1=P.addSlide();s1.background={color:'12a58c'};s1.addText('Production report',{x:.6,y:2,w:9,h:1,fontSize:40,bold:true,color:'FFFFFF'});s1.addText(TODAY+' · last '+r.days+' days · '+(S.cell?'Cell '+S.cell:'all cells')+' · demo data',{x:.6,y:3,w:9,h:.5,fontSize:16,color:'E5F5F1'});
+      if(r.secs.prod){var sl=P.addSlide();title(sl,'Production and yield');sl.addTable([[{text:'Day',options:{bold:true}},{text:'Planned',options:{bold:true}},{text:'Good',options:{bold:true}},{text:'Rework',options:{bold:true}},{text:'Scrap',options:{bold:true}}]].concat(d.slice(-10).map(function(x){return [x.d,String(x.planned),String(x.good),String(x.rework),String(x.scrap)]})),{x:.5,y:1.1,w:9,fontSize:12});sl.addText('Yield '+Math.round(t.g/t.p*100)+'% over the period',{x:.5,y:5,w:9,fontSize:14})}
+      if(r.secs.down){var sl2=P.addSlide();title(sl2,'Downtime by reason');var by={};LE().filter(function(e){return e.stops}).forEach(function(e){by[e.wait]=(by[e.wait]||0)+1});var ks=Object.keys(by);sl2.addChart(P.charts.BAR,[{name:'Stops',labels:ks,values:ks.map(function(k){return by[k]})}],{x:.5,y:1.1,w:9,h:4,barDir:'bar',chartColors:['12a58c']})}
+      if(r.secs.tick){var sl3=P.addSlide();title(sl3,'Ticket status by form');sl3.addTable([[{text:'Form',options:{bold:true}},{text:'Open',options:{bold:true}},{text:'In progress',options:{bold:true}},{text:'Closed',options:{bold:true}}]].concat(FORMS.map(function(f){var a=LE().filter(function(e){return e.form===f.k});var c=function(x){return String(a.filter(function(e){return e.status===x}).length)};return [f.n,c('open'),c('in progress'),c('closed')]})),{x:.5,y:1.1,w:9,fontSize:12})}
+      if(r.secs.alert){var sl4=P.addSlide();title(sl4,'Open alerts ('+al.length+')');sl4.addTable(al.slice(0,12).map(function(a){return [a.m,a.type,a.lvl]}),{x:.5,y:1.1,w:9,fontSize:12})}
+      if(r.secs.qual){var sl5=P.addSlide();title(sl5,'Quality tickets');sl5.addTable(LE().filter(function(e){return e.form==='quality-ticket'&&e.status!=='closed'}).slice(0,12).map(function(e){return [e.tno,e.machine,e.f.fail,e.f.sev]}),{x:.5,y:1.1,w:9,fontSize:12})}
+      P.writeFile({fileName:'Production_report_demo.pptx'});logAct('Report generated','','','REPORT','pptx');S.notice='Report generated and downloaded.';draw()}
+    catch(err){S.notice='The report could not be built: '+err.message;draw()}};
+  if(window.PptxGenJS)return go2();
+  var sc=document.createElement('script');sc.src='https://cdnjs.cloudflare.com/ajax/libs/pptxgenjs/3.12.0/pptxgen.bundle.js';sc.onload=go2;sc.onerror=function(){S.notice='The slide library did not load. Check the connection and try again.';draw()};document.head.appendChild(sc);S.notice='Building the deck…';draw()};
+
+
+/* ================= libraries ================= */
+var KIND={tool:'Tool',probe:'Probe',fixture:'Fixture',pivot:'Pivot'};
+var KUNIT={Tool:'parts',Probe:'touch-points',Fixture:'cycles',Pivot:'days'};
+function libRows(kind){
+  var by={};S.items.filter(function(i){return i.kind===kind}).forEach(function(i){var r=by[i.code]||(by[i.code]={code:i.code,desc:i.desc,limit:kind==='Pivot'?TH.pivotCycle:i.limit,n:0,al:0,ms:[]});r.n++;r.ms.push(i.m);if(stat(i)==='Alert')r.al++});
+  (S.libExtra=S.libExtra||{})[kind]=S.libExtra[kind]||[];
+  S.libExtra[kind].forEach(function(x){if(!by[x.code])by[x.code]={code:x.code,desc:x.desc,limit:x.limit,n:0,al:0,ms:[]}});
+  return Object.keys(by).sort().map(function(k){return by[k]})}
+PAGES.lib=function(){
+  var kind=KIND[S.arg]||'Tool',rows=libRows(kind),q=S.libq||'';
+  rows=rows.filter(function(r){return !q||(r.code+r.desc).toLowerCase().indexOf(q.toLowerCase())>-1});
+  return page(kind+'s library','The master list of every '+kind.toLowerCase()+' type. Changing a limit here changes the status of every machine that uses it, on all dashboards, straight away.','<button class="btn p" data-act="libadd" data-k="'+kind+'">+ Add '+kind.toLowerCase()+'</button>')
+  +filt(lbl('Search','<input type="text" data-inp="libq" value="'+esc(q)+'" placeholder="Code or description">'))
+  +'<div class="card">'+tbl(['Code','Description','Limit ('+KUNIT[kind]+')','Used on','In alert',''],rows.map(function(r){return '<tr><td><b>'+r.code+'</b></td><td>'+esc(r.desc)+'</td><td>'+r.limit+'</td><td>'+r.n+' machines</td><td>'+(r.al?'<span class="chip c-crit">'+r.al+'</span>':'<span class="chip c-ok">0</span>')+'</td><td style="white-space:nowrap"><button class="btn sm" data-act="libedit" data-k="'+kind+'" data-c="'+r.code+'">Edit limit</button> <button class="btn sm" data-act="libassign" data-k="'+kind+'" data-c="'+r.code+'">Assign to machine</button></td></tr>'}),'tall')+'</div>'};
+CHG.libq=function(t){S.libq=t.value;var p=t.selectionStart;S.afterDraw=function(){var i=document.querySelector('[data-inp=libq]');if(i){i.focus();i.setSelectionRange(p,p)}};draw()};
+ACT.libadd=function(el){var k=el.dataset.k;modal(mhead('Add '+k.toLowerCase(),'Adds a new type to the library. Assign it to machines afterwards.')+'<form class="form" data-sub="libadd" data-k="'+k+'"><label>Code<input type="text" name="code" required placeholder="'+(k==='Tool'?'TL-199':k==='Probe'?'PR-9':k==='Fixture'?'FX-9':'PV-9')+'"></label><label>Description<input type="text" name="desc" required></label>'+(k==='Pivot'?'':'<label>Limit ('+KUNIT[k]+')<input type="number" name="limit" min="1" required value="500"></label>')+'<div><button class="btn p" type="submit">Add to library</button></div></form>')};
+SUB.libadd=function(f){var k=f.dataset.k,fd=new FormData(f);S.libExtra[k].push({code:fd.get('code'),desc:fd.get('desc'),limit:+fd.get('limit')||TH.pivotCycle});logAct('Library edit','','',fd.get('code'),k+' added to library');closeModal();S.notice=fd.get('code')+' added to the '+k.toLowerCase()+'s library.';draw()};
+ACT.libedit=function(el){var k=el.dataset.k,c=el.dataset.c;
+  if(k==='Pivot'){modal(mhead('Pivot cycle','All pivots share one calibration cycle.')+'<p>Currently <b>'+TH.pivotCycle+' days</b>. Change it under Admin → Threshold settings.</p>');return}
+  var r=libRows(k).filter(function(x){return x.code===c})[0];
+  modal(mhead('Edit '+c,r.desc)+'<form class="form" data-sub="libedit" data-k="'+k+'" data-c="'+c+'"><label>New limit ('+KUNIT[k]+')<input type="number" name="limit" min="1" required value="'+r.limit+'"></label><div class="hint">'+r.n+' machines use this '+k.toLowerCase()+'; their status will be recalculated.</div><div><button class="btn p" type="submit">Save</button></div></form>')};
+SUB.libedit=function(f){var k=f.dataset.k,c=f.dataset.c,v=+new FormData(f).get('limit'),b=alerts().length;S.items.forEach(function(i){if(i.kind===k&&i.code===c)i.limit=v});(S.libExtra[k]||[]).forEach(function(x){if(x.code===c)x.limit=v});
+  logAct('Library edit','','',c,'Limit set to '+v);closeModal();S.notice=c+' limit set to '+v+'. Alerts went from '+b+' to '+alerts().length+'.';draw()};
+ACT.libassign=function(el){var k=el.dataset.k,c=el.dataset.c;modal(mhead('Assign '+c,'Put this '+k.toLowerCase()+' on a machine.')+'<form class="form" data-sub="libassign" data-k="'+k+'" data-c="'+c+'"><label>Machine<select name="m">'+machOpts('',false)+'</select></label><div><button class="btn p" type="submit">Assign</button></div></form>')};
+SUB.libassign=function(f){var k=f.dataset.k,c=f.dataset.c,r=libRows(k).filter(function(x){return x.code===c})[0],m=S.machines.filter(function(x){return x.code===new FormData(f).get('m')})[0];
+  var it={kind:k,m:m.code,cell:m.cell,stage:m.stage,code:c,desc:r.desc,upd:TODAY};if(k==='Pivot'){it.last=TODAY;it.due=addDays(TODAY,TH.pivotCycle)}else{it.used=0;it.limit=r.limit}
+  S.items.push(it);logAct('Tool assigned','Cell '+m.cell,m.code,c,k+' assigned');closeModal();S.notice=c+' assigned to '+m.code+'.';draw()};
+/* cycle time & inspection time */
+function timeLib(title,sub,key,unit){
+  return page(title,sub)+'<div class="card">'+tbl(['Stage','Current value ('+unit+')','Effect',''],STAGES.map(function(s,i){var v=key==='cyc'?s.cyc:(S.insp[i]);return '<tr><td><b>'+s.n+'</b></td><td>'+v+'</td><td class="hint">'+(key==='cyc'?'Expected parts per shift: '+Math.floor(480*.85/s.cyc):'Added to each frequency check wait')+'</td><td><button class="btn sm" data-act="timeedit" data-key="'+key+'" data-i="'+i+'">Edit</button></td></tr>'}))+'</div>'}
+PAGES.cycle=function(){return timeLib('Cycle Time library','Minutes per part at each stage. The Planning Board and Plan vs Actual read from here.','cyc','min per part')};
+PAGES.inspect=function(){return timeLib('Inspection Time library','Minutes Quality needs to inspect one part at each stage.','insp','min')};
+ACT.timeedit=function(el){var k=el.dataset.key,i=+el.dataset.i,cur=k==='cyc'?STAGES[i].cyc:S.insp[i];modal(mhead('Edit '+STAGES[i].n)+'<form class="form" data-sub="timeedit" data-key="'+k+'" data-i="'+i+'"><label>Minutes<input type="number" step="0.1" min="0.1" name="v" required value="'+cur+'"></label><div><button class="btn p" type="submit">Save</button></div></form>')};
+SUB.timeedit=function(f){var k=f.dataset.key,i=+f.dataset.i,v=+new FormData(f).get('v');if(k==='cyc')STAGES[i].cyc=v;else S.insp[i]=v;logAct('Library edit','','',STAGES[i].n,(k==='cyc'?'Cycle time ':'Inspection time ')+v+' min');closeModal();S.notice=STAGES[i].n+' updated.';draw()};
+/* features */
+PAGES.features=function(){
+  return page('Features','The measured features Quality checks on a part. Each has a tolerance and a check type.','<button class="btn p" data-act="featadd">+ Add feature</button>')
+  +'<div class="card">'+tbl(['Feature','Stage','Tolerance (mm)','Check','Active',''],S.feats.map(function(f,i){return '<tr><td><b>'+esc(f.n)+'</b></td><td>'+f.stage+'</td><td>±'+f.tol+'</td><td>'+f.chk+'</td><td><span class="chip '+(f.on?'c-ok':'c-idle')+'">'+(f.on?'Active':'Off')+'</span></td><td><button class="btn sm" data-act="feattog" data-i="'+i+'">'+(f.on?'Switch off':'Switch on')+'</button></td></tr>'}),'tall')+'</div>'};
+ACT.feattog=function(el){var f=S.feats[+el.dataset.i];f.on=!f.on;logAct('Library edit','','',f.n,f.on?'Switched on':'Switched off');draw()};
+ACT.featadd=function(){modal(mhead('Add feature')+'<form class="form" data-sub="featadd"><label>Name<input type="text" name="n" required placeholder="Example: Bore D14"></label><label>Stage<select name="stage">'+stOpts('',false)+'</select></label><label>Tolerance ±<input type="number" step="0.001" name="tol" required value="0.05"></label><label>Check<select name="chk"><option>CMM</option><option>Gauge</option><option>Visual</option></select></label><div><button class="btn p" type="submit">Add</button></div></form>')};
+SUB.featadd=function(f){var fd=new FormData(f);S.feats.push({n:fd.get('n'),stage:fd.get('stage'),tol:+fd.get('tol'),chk:fd.get('chk'),on:true});logAct('Library edit','','',fd.get('n'),'Feature added');closeModal();S.notice='Feature added.';draw()};
+/* frequency interval */
+PAGES.freq=function(){
+  return page('Frequency Check Interval','How many parts a machine makes between frequency checks. When the count is reached, a frequency part lands in the Quality Queue.')
+  +'<div class="card">'+tbl(['Stage','Interval (parts)','Checks per shift','',''],STAGES.map(function(s,i){var iv=S.freqInt[i];return '<tr><td><b>'+s.n+'</b></td><td>'+iv+'</td><td>'+(Math.floor(480*.85/s.cyc/iv*10)/10)+'</td><td><button class="btn sm" data-act="freqedit" data-i="'+i+'">Edit</button></td><td><button class="btn sm" data-act="freqpull" data-i="'+i+'">Pull a part now</button></td></tr>'}))+'</div>'};
+ACT.freqedit=function(el){var i=+el.dataset.i;modal(mhead('Edit '+STAGES[i].n)+'<form class="form" data-sub="freqedit" data-i="'+i+'"><label>Parts between checks<input type="number" min="1" name="v" required value="'+S.freqInt[i]+'"></label><div><button class="btn p" type="submit">Save</button></div></form>')};
+SUB.freqedit=function(f){var i=+f.dataset.i;S.freqInt[i]=+new FormData(f).get('v');logAct('Library edit','','',STAGES[i].n,'Interval '+S.freqInt[i]);closeModal();S.notice=STAGES[i].n+' interval saved.';draw()};
+ACT.freqpull=function(el){var i=+el.dataset.i,m=S.machines.filter(function(x){return x.stageIdx===i&&(!S.cell||x.cell===S.cell)&&x.state==='run'})[0]||S.machines[i];S.queue.freq.push({id:++S.qid,since:1,cell:m.cell,machine:m.code,part:'Frequency check',by:'Demo manager'});S.notice='A part was pulled from '+m.code+' and added to the Quality Queue.';draw()};
+
+
+/* ================= team ================= */
+var ROLES=['Admin','Manager','Cell lead','Operator','Quality','Maintenance','Viewer'];
+var PROLE=['Manager','Cell lead','Operator','Quality','Operator','Maintenance','Cell lead','Operator','Quality','Operator'];
+function person(n){var i=PEOPLE.indexOf(n);return{n:n,role:PROLE[i],cell:String(i%3+1),base:['A','B','C'][i%3]}}
+function shiftOf(p,w){var rot={A:'C',C:'B',B:'A'},s=p.base;for(var i=0;i<w;i++)s=rot[s];var sw=S.swaps[p.n+'|'+w];return sw||s}
+function weekStart(w){return addDays('2026-11-09',w*7)}
+PAGES.roster=function(){
+  var ws=[0,1,2,3];
+  return page('Shift Roster','Crews rotate every week A → C → B → A. A swap changes one person for one week and the Shift dashboard follows it.','<button class="btn p" data-act="swapnew">Swap shifts</button>')
+  +filt(lbl('Cell','<select data-f="cell">'+cellOpts(S.cell)+'</select>'))
+  +'<div class="card">'+tbl(['Person','Role','Cell'].concat(ws.map(function(w){return 'Week of '+dd(weekStart(w))})),PEOPLE.filter(function(n){return !S.cell||person(n).cell===S.cell}).map(function(n){var p=person(n);return '<tr><td><b>'+n+'</b></td><td>'+p.role+'</td><td>Cell '+p.cell+'</td>'+ws.map(function(w){var s=shiftOf(p,w),sw=S.swaps[n+'|'+w];return '<td><span class="chip '+(s==='A'?'c-open':s==='B'?'c-prog':'c-idle')+'">'+s+'</span>'+(sw?'<span class="hint"> swapped</span>':'')+'</td>'}).join('')+'</tr>'}))+'</div>'
+  +'<div class="card"><h3>Shift times</h3><p class="sub" style="margin:4px 0 0">A '+SHIFTS.A+' · B '+SHIFTS.B+' · C '+SHIFTS.C+'</p></div>'};
+ACT.swapnew=function(){modal(mhead('Swap shifts','Pick two people and a week. They exchange shifts for that week only.')+'<form class="form" data-sub="swap"><label>Person 1<select name="a">'+opts(PEOPLE)+'</select></label><label>Person 2<select name="b">'+opts(PEOPLE.slice().reverse())+'</select></label><label>Week<select name="w">'+opts([0,1,2,3].map(function(w){return [w,'Week of '+dd(weekStart(w))]}))+'</select></label><div><button class="btn p" type="submit">Swap</button></div></form>')};
+SUB.swap=function(f){var fd=new FormData(f),a=fd.get('a'),b=fd.get('b'),w=+fd.get('w');if(a===b){S.notice='Pick two different people.';closeModal();return draw()}
+  var sa=shiftOf(person(a),w),sb=shiftOf(person(b),w);S.swaps[a+'|'+w]=sb;S.swaps[b+'|'+w]=sa;logAct('Shift swap','','',a+' / '+b,'Week of '+weekStart(w));closeModal();S.notice=a+' and '+b+' swapped for the week of '+dd(weekStart(w))+'.';draw()};
+PAGES.people=function(){
+  return page('People','Everyone with a login on the shop floor, their role and this week\'s shift.')
+  +'<div class="card">'+tbl(['Name','Role','Cell','This week','Tickets closed (30 d)','Open tasks'],PEOPLE.map(function(n){var p=person(n);return '<tr><td><b>'+n+'</b></td><td>'+p.role+'</td><td>Cell '+p.cell+'</td><td><span class="chip c-prog">Shift '+shiftOf(p,0)+'</span></td><td>'+LE().filter(function(e){return e.closedBy===n}).length+'</td><td>'+S.tasks.filter(function(t){return t.to===n&&t.st!=='Verified'}).length+'</td></tr>'}))+'</div>'};
+PAGES.sdash=function(){
+  var sh=S.sdsh||'B',crew=PEOPLE.filter(function(n){return shiftOf(person(n),0)===sh}),en=LE().filter(function(e){return e.date===TODAY&&e.shift===sh&&(!S.cell||e.cell===S.cell)}),pl=S.plog.filter(function(r){return r.d===TODAY&&r.sh===sh&&(!S.cell||r.cell===S.cell)}),
+    t=pl.reduce(function(a,r){a.p+=r.planned;a.g+=r.good;return a},{p:0,g:0});
+  return page('Shift dashboard','What one shift did and who was on it. Pick a shift to compare.')
+  +filt(lbl('Shift','<select data-f="sdsh">'+opts([['A','A · '+SHIFTS.A],['B','B · '+SHIFTS.B],['C','C · '+SHIFTS.C]],sh)+'</select>')+lbl('Cell','<select data-f="cell">'+cellOpts(S.cell)+'</select>'))
+  +'<div class="tiles">'+tile('g','👥',crew.length,'On shift','sdash',crew.join(', '))+tile('g','▦',t.g,'Good parts','sdash','of '+t.p+' planned')+tile('w','🎫',en.length,'Tickets raised','sdash')+tile('r','■',en.filter(function(e){return e.stops}).length,'Stops','sdash')+'</div>'
+  +'<div class="two e"><div class="card"><h2>Crew</h2>'+tbl(['Name','Role','Cell'],crew.map(function(n){var p=person(n);return '<tr><td><b>'+n+'</b></td><td>'+p.role+'</td><td>Cell '+p.cell+'</td></tr>'}))+'</div>'
+  +'<div class="card"><h2>Tickets this shift</h2>'+tbl(['Ticket','Machine','Status'],en.slice(0,12).map(function(e){return '<tr class="click" data-m="'+e.machine+'"><td><b>'+e.tno+'</b></td><td>'+e.machine+'</td><td>'+chipFor(e.status)+'</td></tr>'}))+'</div></div>'};
+/* tasks */
+var TSTEPS=['Assigned','Accepted','In progress','Done','Verified'];
+function genTasks(){
+  S.tasks=[];var ids=S.entries.filter(function(e){return e.status!=='closed'&&!e.deleted}).slice(0,12);
+  ids.forEach(function(e,i){var st=TSTEPS[i%5];S.tasks.push({id:i+1,tno:e.tno,machine:e.machine,what:e.next+' — '+e.fn,to:i<3?'Demo manager':PEOPLE[(i*3)%PEOPLE.length],by:'Demo manager',st:st,due:addDays(TODAY,i%4-1),doer:st==='Done'||st==='Verified'?(i<3?'Demo manager':PEOPLE[(i*3)%PEOPLE.length]):''})});
+  S.tasks[3].st='Done';S.tasks[3].doer='Demo manager';S.tasks[3].to='Demo manager'}
+PAGES.tasks=function(){
+  var who=S.tkw===undefined?'Demo manager':S.tkw,rows=S.tasks.filter(function(t){return !who||t.to===who});
+  return page('My tasks','Work handed to a person from a ticket. A task goes Assigned → Accepted → In progress → Done → Verified, and the person who verifies it cannot be the person who did it.','<button class="btn p" data-act="tasknew">+ Assign a task</button>')
+  +filt(lbl('Assigned to','<select data-chg="tkw">'+opts(['Demo manager'].concat(PEOPLE),who,'Everyone')+'</select>'))
+  +'<div class="card">'+tbl(['Task','Machine','Assigned to','Due','Status','Next step'],rows.map(function(t){var nx=TSTEPS[TSTEPS.indexOf(t.st)+1],blocked=t.st==='Done'&&t.doer==='Demo manager';
+    return '<tr><td><b>'+t.tno+'</b><div class="hint">'+esc(t.what)+'</div></td><td>'+t.machine+'</td><td>'+t.to+'</td><td>'+(t.due<TODAY&&t.st!=='Verified'?'<span class="chip c-over">'+dd(t.due)+'</span>':dd(t.due))+'</td><td><span class="chip '+(t.st==='Verified'?'c-done':t.st==='Done'?'c-ok':t.st==='Assigned'?'c-open':'c-prog')+'">'+t.st+'</span></td><td>'+(nx?(blocked?'<span class="hint">Needs a verifier other than '+t.doer+'</span> <button class="btn sm" data-act="taskas" data-id="'+t.id+'">Ask '+PEOPLE[2]+' to verify</button>':'<button class="btn sm p" data-act="taskadv" data-id="'+t.id+'">'+(nx==='Verified'?'Verify':'Mark '+nx.toLowerCase())+'</button>'):'—')+'</td></tr>'}))+'</div>'};
+CHG.tkw=function(t){S.tkw=t.value;draw()};
+ACT.taskadv=function(el){var t=S.tasks.filter(function(x){return x.id===+el.dataset.id})[0],nx=TSTEPS[TSTEPS.indexOf(t.st)+1];if(nx==='Done')t.doer=t.to;t.st=nx;logAct('Task '+nx.toLowerCase(),'',t.machine,t.tno,t.what);S.notice=t.tno+' is now '+nx+'.';draw()};
+ACT.taskas=function(el){var t=S.tasks.filter(function(x){return x.id===+el.dataset.id})[0];t.st='Verified';t.verifier=PEOPLE[2];S.notice=PEOPLE[2]+' verified '+t.tno+' (a different person from '+t.doer+').';draw()};
+ACT.tasknew=function(){var open=S.entries.filter(function(e){return e.status!=='closed'&&!e.deleted}).slice(0,20);modal(mhead('Assign a task','Hands the next step of a ticket to a person.')+'<form class="form" data-sub="tasknew"><label>Ticket<select name="t">'+opts(open.map(function(e){return [e.id,e.tno+' · '+e.machine+' · '+e.fn]}))+'</select></label><label>Assign to<select name="to">'+opts(PEOPLE)+'</select></label><label>Due<input type="date" name="due" value="'+addDays(TODAY,1)+'"></label><div><button class="btn p" type="submit">Assign</button></div></form>')};
+SUB.tasknew=function(f){var fd=new FormData(f),e=entryById(fd.get('t'));S.tasks.unshift({id:S.tasks.length+1,tno:e.tno,machine:e.machine,what:e.next+' — '+e.fn,to:fd.get('to'),by:'Demo manager',st:'Assigned',due:fd.get('due'),doer:''});logAct('Task assigned','Cell '+e.cell,e.machine,e.tno,'to '+fd.get('to'));closeModal();S.tkw='';S.notice='Task assigned to '+fd.get('to')+'.';draw()};
+/* chat */
+var CHANNELS=['General','Cell 1','Cell 2','Cell 3','Quality'];
+function genChat(){S.chat={};CHANNELS.forEach(function(c,ci){S.chat[c]=[];var msgs=['Coolant topped up on the line.','Waiting for the program to be released.','Probe calibrated, restarting the cycle.','Quality is on the way to pull the part.','Fixture re-torqued, back to running.','Shift handover done.'];for(var i=0;i<5;i++)S.chat[c].push({u:PEOPLE[(ci*3+i)%PEOPLE.length],t:hm(6*60+i*37+ci*11),x:msgs[(ci+i)%msgs.length]})});S.chCur='General'}
+PAGES.chat=function(){
+  var c=S.chCur;
+  return page('Chat','One thread per cell, plus General and Quality. Messages stay in this browser tab for the demo.')
+  +'<div class="two" style="grid-template-columns:200px 1fr"><div class="card" style="padding:8px">'+CHANNELS.map(function(x){return '<button class="nav'+(x===c?' on':'')+'" data-act="chsel" data-c="'+x+'">'+(x==='General'||x==='Quality'?'# ':'')+x+'<span class="pill" style="background:var(--muted)">'+S.chat[x].length+'</span></button>'}).join('')+'</div>'
+  +'<div class="card"><h2># '+c+'</h2><div id="chlog" style="max-height:380px;overflow:auto;margin:8px 0">'+S.chat[c].map(function(m){return '<div style="margin:8px 0"><b>'+m.u+'</b> <span class="hint">'+m.t+'</span><div>'+esc(m.x)+'</div></div>'}).join('')+'</div><form class="filters" data-sub="chsend"><input type="text" name="x" required placeholder="Write a message" style="flex:1;min-width:200px"><button class="btn p" type="submit">Send</button></form></div></div>'};
+ACT.chsel=function(el){S.chCur=el.dataset.c;S.afterDraw=chScroll;draw()};
+function chScroll(){var l=document.getElementById('chlog');if(l)l.scrollTop=l.scrollHeight}
+SUB.chsend=function(f){var x=new FormData(f).get('x');S.chat[S.chCur].push({u:'Demo manager',t:hm(NOW_MIN),x:x});S.afterDraw=chScroll;draw()};
+/* scorecards */
+PAGES.score=function(){
+  var rows=PEOPLE.map(function(n){var cl=LE().filter(function(e){return e.closedBy===n}),tk=S.tasks.filter(function(t){return t.to===n}),dn=tk.filter(function(t){return t.st==='Done'||t.st==='Verified'}).length;
+    var sc=Math.min(100,Math.round(40+cl.length*4+dn*8+(hh(n)%12)));return{n:n,cl:cl.length,tk:tk.length,dn:dn,sc:sc}}).sort(function(a,b){return b.sc-a.sc});
+  return page('Scorecards','A simple score per person from the tickets they closed and the tasks they finished. It is a conversation starter, not a ranking.')
+  +'<div class="card">'+tbl(['#','Person','Role','Tickets closed','Tasks done','Score',''],rows.map(function(r,i){return '<tr><td>'+(i+1)+'</td><td><b>'+r.n+'</b></td><td>'+person(r.n).role+'</td><td>'+r.cl+'</td><td>'+r.dn+' of '+r.tk+'</td><td><b>'+r.sc+'</b></td><td style="min-width:140px"><div class="bar"><i style="width:'+r.sc+'%"></i></div></td></tr>'}))+'</div>'};
+/* performance */
+PAGES.perf=function(){
+  var rows=CELLS.map(function(c){var ms=S.machines.filter(function(m){return m.cell===c.id}),dt=ms.reduce(function(a,m){return a+m.hist.reduce(function(b,h){return b+h.dur},0)},0)+ms.reduce(function(a,m){return a+m.mins},0),avail=100-dt/(ms.length*30*480)*100,pr=S.prod.slice(-30),k=1/3,t=sumProd(pr),open=LE().filter(function(e){return e.cell===c.id&&e.status!=='closed'}).length,cl=LE().filter(function(e){return e.cell===c.id&&e.status==='closed'}).length;
+    return{c:c,av:avail,yield:t.g/t.p*100,dt:dt,open:open,cl:cl}});
+  var W=700,H=200,L=40,B=24,T=10,d=S.prod.slice(-30),mn=70,mx=100,y=function(v){return T+(H-T-B)*(1-(v-mn)/(mx-mn))},x=function(i){return L+i*(W-L-6)/(d.length-1)};
+  var pts=d.map(function(p,i){return x(i)+','+y(Math.max(mn,p.good/p.planned*100))}).join(' ');
+  var grid='';for(var g=70;g<=100;g+=10)grid+='<line x1="'+L+'" x2="'+W+'" y1="'+y(g)+'" y2="'+y(g)+'" stroke="var(--grid)"/><text x="'+(L-6)+'" y="'+(y(g)+3)+'" text-anchor="end">'+g+'%</text>';
+  return page('Performance','Availability and yield by cell over the last 30 days. Availability comes from the stop history on every machine, so tickets you close today change it.')
+  +'<div class="card">'+tbl(['Cell','Availability','Yield','Downtime','Open tickets','Closed tickets'],rows.map(function(r){return '<tr><td><b>'+r.c.name+'</b></td><td>'+r.av.toFixed(1)+'%</td><td>'+r.yield.toFixed(1)+'%</td><td>'+fmtMin(r.dt)+'</td><td>'+r.open+'</td><td>'+r.cl+'</td></tr>'}))+'</div>'
+  +'<div class="card"><h2>Daily yield</h2><svg viewBox="0 0 '+W+' '+H+'" width="100%" role="img" aria-label="Daily yield">'+grid+'<polyline points="'+pts+'" fill="none" stroke="var(--accent)" stroke-width="2.2"/>'+d.map(function(p,i){return i%6===0?'<text x="'+x(i)+'" y="'+(H-6)+'" text-anchor="middle">'+dd(p.d)+'</text>':''}).join('')+'</svg></div>'};
+/* ================= admin ================= */
+function visF(k){return FDEF[k].fields.filter(function(f){var s=S.fset[k]&&S.fset[k][f.k];return !s||s.show!==false})}
+function reqF(k,f){var s=S.fset[k]&&S.fset[k][f.k];return !!(s&&s.req)}
+PAGES.fields=function(){
+  var k=S.arg&&FDEF[S.arg]?S.arg:(S.fsel||'correction-entry'),D=FDEF[k];
+  return page('Field settings','Choose which fields each form shows and which are required. The New buttons on every log follow these settings straight away.')
+  +filt(lbl('Form','<select data-chg="fsel">'+opts(FORMS.map(function(f){return [f.k,f.n]}),k)+'</select>'))
+  +'<div class="card">'+tbl(['Field','Type','Shown','Required'],D.fields.map(function(f){var s=(S.fset[k]&&S.fset[k][f.k])||{show:true,req:false};return '<tr><td><b>'+f.l+'</b></td><td>'+({sel:'Choice',num:'Number',text:'Text',area:'Long text',person:'Person',date:'Date'}[f.t]||'Text')+'</td><td><input type="checkbox" data-chg="fset" data-k="'+k+'" data-f="show" data-x="'+f.k+'"'+(s.show!==false?' checked':'')+'></td><td><input type="checkbox" data-chg="fset" data-k="'+k+'" data-f="req" data-x="'+f.k+'"'+(s.req?' checked':'')+'></td></tr>'}))+'</div>'};
+CHG.fsel=function(t){S.fsel=t.value;draw()};
+CHG.fset=function(t){var d=t.dataset;(S.fset[d.k]=S.fset[d.k]||{});var s=S.fset[d.k][d.x]=S.fset[d.k][d.x]||{show:true,req:false};
+  /* "f" is also the generic select hook, so use the explicit data-f value here */
+  if(d.f==='show')s.show=t.checked;else s.req=t.checked;S.notice='Saved. Open the log for this form and press New to see it.';draw()};
+PAGES.thresh=function(){
+  var al=alerts(),rows=[['near','Near-limit warning at (% of limit)',TH.near,'Tools, probes and fixtures turn amber at this point.'],['alert','Alert at (% of limit)',TH.alert,'Turns red and raises a critical alert.'],['pivotCycle','Pivot calibration cycle (days)',TH.pivotCycle,'Days between pivot calibrations.'],['pivotNear','Pivot warning (days before due)',TH.pivotNear,'Amber this many days before the due date.'],['overdueDays','Ticket overdue after (days)',TH.overdueDays,'Open tickets older than this show as overdue.'],['logsHealth','Logs health limit (% overdue)',TH.logsHealth,'Forms page turns red above this.']];
+  return page('Threshold settings','Every limit the dashboards use. Change a number and the whole demo recalculates; nothing here needs a restart.')
+  +'<div class="tiles">'+tile('w','⚠',al.length,'Alerts right now','dashboard')+tile('r','■',al.filter(function(a){return a.lvl==='Critical'}).length,'Critical','dashboard')+tile('w','⏱',stats().over.length,'Overdue tickets','tickets')+'</div>'
+  +'<div class="card"><form class="form" data-sub="thresh" style="grid-template-columns:1fr 1fr">'+rows.map(function(r){return '<label>'+r[1]+'<input type="number" name="'+r[0]+'" value="'+r[2]+'" min="1" required><span class="hint">'+r[3]+'</span></label>'}).join('')+'<div style="grid-column:1/-1"><button class="btn p" type="submit">Save thresholds</button> <button class="btn" type="button" data-act="threshreset">Reset to defaults</button></div></form></div>'};
+SUB.thresh=function(f){var fd=new FormData(f);['near','alert','pivotCycle','pivotNear','overdueDays','logsHealth'].forEach(function(k){TH[k]=+fd.get(k)});
+  S.items.forEach(function(i){if(i.kind==='Pivot')i.due=addDays(i.last,TH.pivotCycle)});logAct('Thresholds saved','','','TH','Near '+TH.near+'%, alert '+TH.alert+'%');S.notice='Thresholds saved. There are now '+alerts().length+' alerts.';draw()};
+ACT.threshreset=function(){TH.near=80;TH.alert=100;TH.pivotCycle=30;TH.pivotNear=5;TH.overdueDays=3;TH.logsHealth=15;S.items.forEach(function(i){if(i.kind==='Pivot')i.due=addDays(i.last,30)});S.notice='Defaults restored.';draw()};
+/* users */
+function genUsers(){S.users=PEOPLE.map(function(n,i){return{n:n,email:n.toLowerCase().replace(/[^a-z]+/g,'.')+'@demo-plant.example',role:PROLE[i],cell:String(i%3+1),on:i!==9}});S.users.unshift({n:'Demo manager',email:'manager@demo-plant.example',role:'Admin',cell:'All',on:true})}
+PAGES.users=function(){
+  return page('Users','Who can sign in, their role and cell. Switching someone off keeps their history but ends their access.','<button class="btn p" data-act="useradd">+ Invite user</button>')
+  +'<div class="card">'+tbl(['Name','Email','Role','Cell','Status',''],S.users.map(function(u,i){return '<tr><td><b>'+esc(u.n)+'</b></td><td>'+esc(u.email)+'</td><td><select data-chg="userrole" data-i="'+i+'">'+opts(ROLES,u.role)+'</select></td><td>'+(u.cell==='All'?'All cells':'Cell '+u.cell)+'</td><td><span class="chip '+(u.on?'c-ok':'c-idle')+'">'+(u.on?'Active':'Off')+'</span></td><td><button class="btn sm" data-act="usertog" data-i="'+i+'">'+(u.on?'Switch off':'Switch on')+'</button></td></tr>'}))+'</div>'};
+CHG.userrole=function(t){var u=S.users[+t.dataset.i];u.role=t.value;logAct('User changed','','',u.n,'Role '+u.role);S.notice=u.n+' is now '+u.role+'.';draw()};
+ACT.usertog=function(el){var u=S.users[+el.dataset.i];u.on=!u.on;logAct('User changed','','',u.n,u.on?'Switched on':'Switched off');draw()};
+ACT.useradd=function(){modal(mhead('Invite user')+'<form class="form" data-sub="useradd"><label>Name<input type="text" name="n" required></label><label>Email<input type="email" name="e" required placeholder="name@example.com"></label><label>Role<select name="r">'+opts(ROLES,'Operator')+'</select></label><label>Cell<select name="c">'+cellOpts('1',false)+'</select></label><div class="hint">Demo only: no invite email is sent.</div><div><button class="btn p" type="submit">Add user</button></div></form>')};
+SUB.useradd=function(f){var fd=new FormData(f);S.users.push({n:fd.get('n'),email:fd.get('e'),role:fd.get('r'),cell:fd.get('c'),on:true});logAct('User added','','',fd.get('n'),fd.get('r'));closeModal();S.notice=fd.get('n')+' added.';draw()};
+/* permissions */
+var PERMS=['View dashboards','Raise tickets','Close tickets','Approve corrections','Delete entries','Edit libraries','Edit thresholds','Manage users'];
+function genPerms(){S.perms={};var allow={Admin:[1,1,1,1,1,1,1,1],Manager:[1,1,1,1,1,1,1,0],'Cell lead':[1,1,1,0,0,0,0,0],Operator:[1,1,0,0,0,0,0,0],Quality:[1,1,1,1,0,0,0,0],Maintenance:[1,1,1,0,0,0,0,0],Viewer:[1,0,0,0,0,0,0,0]};ROLES.forEach(function(r){S.perms[r]=allow[r].slice()})}
+PAGES.perms=function(){
+  return page('Role Permissions','Tick what each role may do. Admin always keeps every permission.')
+  +'<div class="card">'+tbl(['Permission'].concat(ROLES),PERMS.map(function(p,pi){return '<tr><td><b>'+p+'</b></td>'+ROLES.map(function(r){return '<td style="text-align:center"><input type="checkbox" data-chg="perm" data-r="'+r+'" data-p="'+pi+'"'+(S.perms[r][pi]?' checked':'')+(r==='Admin'?' disabled':'')+'></td>'}).join('')+'</tr>'}))+'</div>'};
+CHG.perm=function(t){S.perms[t.dataset.r][+t.dataset.p]=t.checked?1:0;logAct('Permissions changed','','',t.dataset.r,PERMS[+t.dataset.p]+(t.checked?' on':' off'));S.notice='Saved.';draw()};
+/* dashboard layouts */
+var WIDGETS=[['cells','Cell cards'],['prod','Production vs rejects'],['activity','Recent activity and downtime'],['reasons','Downtime by reason'],['alerts','Alerts table']];
+PAGES.layouts=function(){
+  return page('Dashboard Layouts','Choose which blocks the Dashboard shows. Switch one off, then open the Dashboard to see it gone.')
+  +'<div class="card">'+WIDGETS.map(function(w){return '<label style="display:flex;gap:10px;align-items:center;margin:8px 0;font-weight:500"><input type="checkbox" data-chg="layout" data-w="'+w[0]+'"'+(S.hidden[w[0]]?'':' checked')+'> '+w[1]+'</label>'}).join('')+'<button class="btn" data-act="layreset">Show everything</button></div>'};
+CHG.layout=function(t){S.hidden[t.dataset.w]=!t.checked;S.notice='Layout saved.';draw()};
+ACT.layreset=function(){S.hidden={};draw()};
+function applyLayout(){Object.keys(S.hidden||{}).forEach(function(k){if(S.hidden[k])Array.prototype.forEach.call(document.querySelectorAll('[data-w="'+k+'"]'),function(n){n.style.display='none'})})}
+/* activity log */
+PAGES.activity=function(){
+  var f=S.acf=S.acf||{ev:'',q:'',page:1},evs=Array.from(new Set(S.activity.map(function(a){return a.ev}))).sort(),
+    rows=S.activity.filter(function(a){return (!f.ev||a.ev===f.ev)&&(!S.cell||a.cell==='Cell '+S.cell)&&(!f.q||(a.m+a.code+a.desc+a.user).toLowerCase().indexOf(f.q.toLowerCase())>-1)}),pages=Math.max(1,Math.ceil(rows.length/20));if(f.page>pages)f.page=pages;
+  return page('Activity Log','Everything that happened, newest first. Every action you take in this demo shows up here.','<button class="btn" data-act="acxls">Download as Excel</button>')
+  +filt(lbl('Event','<select data-chg="acf" data-p="ev">'+opts(evs,f.ev,'All events')+'</select>')+lbl('Cell','<select data-f="cell">'+cellOpts(S.cell)+'</select>')+lbl('Search','<input type="text" data-inp="acq" value="'+esc(f.q)+'" placeholder="Machine, code, person">'))
+  +'<div class="card">'+tbl(['When','Event','Cell','Machine','Code','Detail','By'],rows.slice((f.page-1)*20,f.page*20).map(function(a){return '<tr><td>'+a.t+'</td><td>'+a.ev+'</td><td>'+a.cell+'</td><td>'+a.m+'</td><td>'+a.code+'</td><td>'+esc(a.desc)+'</td><td>'+a.user+'</td></tr>'}),'tall')
+  +'<div class="filters" style="margin-top:10px;justify-content:space-between"><span class="hint">'+rows.length+' events</span><span class="filters"><button class="btn sm" data-act="acpage" data-d="-1">‹ Prev</button><span>Page '+f.page+' of '+pages+'</span><button class="btn sm" data-act="acpage" data-d="1">Next ›</button></span></div></div>'};
+CHG.acf=function(t){S.acf[t.dataset.p]=t.value;S.acf.page=1;draw()};
+CHG.acq=function(t){S.acf.q=t.value;S.acf.page=1;var p=t.selectionStart;S.afterDraw=function(){var i=document.querySelector('[data-inp=acq]');if(i){i.focus();i.setSelectionRange(p,p)}};draw()};
+ACT.acpage=function(el){S.acf.page=Math.max(1,S.acf.page+ +el.dataset.d);draw()};
+ACT.acxls=function(){dlCsv('Activity_log.csv',[['When','Event','Cell','Machine','Code','Detail','By']].concat(S.activity.map(function(a){return [a.t,a.ev,a.cell,a.m,a.code,a.desc,a.user]})))};
+
+
+/* ================= start-up ================= */
+S.swaps={};S.hidden={};S.fset={};S.insp=[1.5,3,5,6];S.freqInt=[25,20,15,12];S.libExtra={};
+S.feats=FEATS.map(function(n,i){return{n:n,stage:STAGES[i%4].n,tol:[0.05,0.02,0.1,0.03][i%4],chk:['CMM','Gauge','CMM','Visual'][i%4],on:i!==11}});
+build();
+genProdLog();genTasks();genChat();genUsers();genPerms();
+var _draw=draw;draw=function(){_draw();applyLayout()};
+window.addEventListener('hashchange',route);
+route();
+window.__PC={S:S,PAGES:PAGES,NAV:NAV};
+
+})();
+</script>
+</body>
+</html>
